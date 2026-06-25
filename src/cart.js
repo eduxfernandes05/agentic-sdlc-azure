@@ -30,7 +30,7 @@ export function applyVoucher(total, voucherCode) {
   if (!VOUCHERS[code]) {
     throw new Error(`Invalid or expired voucher code: "${voucherCode}"`);
   }
-  const discountAmount = parseFloat((total * VOUCHERS[code]).toFixed(2));
-  const discountedTotal = parseFloat((total - discountAmount).toFixed(2));
+  const discountAmount = Math.round(total * VOUCHERS[code] * 100) / 100;
+  const discountedTotal = Math.round((total - discountAmount) * 100) / 100;
   return { discountedTotal, discountAmount };
 }
