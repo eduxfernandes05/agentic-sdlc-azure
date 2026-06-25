@@ -1,0 +1,9 @@
+{
+  "name": "contoso-cart",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Tiny shopping-cart module for the agentic demo",
+  "scripts": {
+    "test": "node --test"
+  }
+}
