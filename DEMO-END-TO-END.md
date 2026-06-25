@@ -8,6 +8,20 @@
 
 ---
 
+## 0. Links rápidos (live)
+
+| Recurso | URL / ID |
+|---|---|
+| 🛒 **Site live** (contoso-cart) | `https://ca-contoso-cart.gentlepond-a81d8e3c.swedencentral.azurecontainerapps.io/` |
+| 🛒 API do carrinho | `https://ca-contoso-cart.gentlepond-a81d8e3c.swedencentral.azurecontainerapps.io/api/cart` |
+| 🤖 Container App `/agent` (delegação) | `https://ca-api-edudemo-csdk-4bq4xx.gentlepond-a81d8e3c.swedencentral.azurecontainerapps.io/agent` |
+| 🐙 Repo GitHub | `https://github.com/eduxfernandes05/contoso-cart` |
+| ⚙️ GitHub Actions (CI/CD) | `https://github.com/eduxfernandes05/contoso-cart/actions` |
+| 🧠 APIM Gateway | `https://apim-zj44ehcf4zlxq.azure-api.net` |
+| 🧠 OpenAI via APIM | `https://apim-zj44ehcf4zlxq.azure-api.net/inference/openai` |
+
+---
+
 ## 1. A história (o "porquê")
 
 Um colaborador de negócio descreve uma funcionalidade que quer ("adicionar um voucher de 10% no checkout").
@@ -52,6 +66,11 @@ flowchart TB
         REPO["Repo contoso-cart<br/>Issue → Pull Request"]
     end
 
+    subgraph LIVE["Site live (muda a cada merge)"]
+        ACT["GitHub Actions<br/>az acr build + containerapp update"]
+        SITE["Container App<br/>ca-contoso-cart (site)"]
+    end
+
     U --> M365
     U --> CS
     M365 --> AG
@@ -63,10 +82,13 @@ flowchart TB
     ACA -->|"GraphQL: createIssue + assign"| REPO
     REPO --> GH
     GH -->|"lê repo, implementa, abre PR"| REPO
+    REPO -->|"merge em main"| ACT
+    ACT -->|"build + deploy"| SITE
 
     style APIM fill:#0078d4,color:#fff
     style AG fill:#5c2d91,color:#fff
     style GH fill:#24292e,color:#fff
+    style SITE fill:#107c10,color:#fff
 ```
 
 ### Princípios de design
@@ -141,6 +163,28 @@ decides the implementation details itself."* Auth no tool = **Anonymous**.
 | Azure (Foundry/APIM/ACA) | `64986eab-445d-4496-9cc0-6059eb44089c` — sub `fc1573e2-1be9-4029-972c-053756991cf4` |
 | Copilot Studio / Agent365 | `72f988bf-86f1-41af-91ab-2d7cd011db47` (corporativo) |
 
+### 3.8 Site live + CI/CD (o repo **É** o site)
+O `contoso-cart` deixou de ser um módulo e passou a ser uma **web app Express** servida numa Container App.
+A cada **merge em `main`**, o GitHub Actions reconstrói a imagem e atualiza a Container App → **o site muda ao vivo**.
+
+| Item | Valor |
+|---|---|
+| Site (Container App) | `ca-contoso-cart` em `cae-edudemo-csdk-4bq4xx` (`rg-agent-demo`) |
+| URL do site | `https://ca-contoso-cart.gentlepond-a81d8e3c.swedencentral.azurecontainerapps.io/` |
+| Ingress | externo, `targetPort 3000`, pull do ACR via **managed identity** |
+| ACR | `acredudemocsd4bq4xx` (imagem `contoso-cart`) |
+| App (web) | `server.js` (Express ESM) + `public/index.html` + `Dockerfile` |
+| Workflow | `.github/workflows/deploy.yml` — `push:[main]` + `workflow_dispatch` |
+| Auth do CI/CD | **OIDC** (sem secrets de password) |
+| Service principal | app `gha-contoso-cart-deploy` (`appId a88c077d-4fc0-4836-a0b3-b087d3a83188`) |
+| Federated credential | subject `repo:eduxfernandes05/contoso-cart:ref:refs/heads/main` |
+| Roles do SP | `AcrPush` + `Contributor` (no ACR) + `Container Apps Contributor` (no RG) |
+| GitHub secrets | `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` |
+
+> **Validado**: workflow corrido manualmente → login OIDC ✅ → `az acr build` ✅ → `az containerapp update` ✅.
+> O site responde **HTTP 200** e `/api/cart` devolve `{ subtotal: 16 }`.
+> Como o repo agora é um site visível, quando o Copilot coding agent implementa uma feature de checkout, **também mexe na UI** — e o merge leva a mudança ao site.
+
 ---
 
 ## 4. Fluxo passo-a-passo (cenário completo)
@@ -152,10 +196,13 @@ decides the implementation details itself."* Auth no tool = **Anonymous**.
 5. O tool faz **HTTP POST** ao **Container App `/agent`**.
 6. O `/agent` usa **GitHub GraphQL**: cria a **issue** e atribui ao **`copilot-swe-agent`**.
 7. O **GitHub Copilot coding agent** lê o repo, implementa, corre testes e **abre um Pull Request (draft)**.
-8. Um **humano** revê e faz merge.
+8. Um **humano** revê e faz merge em `main`.
+9. O **GitHub Actions** dispara: `az acr build` → `az containerapp update` (auth **OIDC**).
+10. A **Container App `ca-contoso-cart` muda ao vivo** — o cliente vê o site atualizado.
 
 **Prova viva já obtida**: pedido "voucher 10%" → issue #7 → PR #8. Pedido "voucher 50%" →
 issue #9 → PR #10. Governance: pedido excedeu o TPM do APIM → **`429 ModelGateway`** (a policy disparou).
+CI/CD: workflow `Deploy to Azure Container App` corrido com sucesso (OIDC → build → deploy).
 
 ---
 
@@ -168,9 +215,9 @@ issue #9 → PR #10. Governance: pedido excedeu o TPM do APIM → **`429 ModelGa
 | **F2** | Policies de governance (`llm-token-limit`) | ✅ Completo |
 | **F3** | Container App `/agent` (delegação GitHub) | ✅ Completo + validado em produção (issue→PR) |
 | **F4** | Agente Foundry + OpenAPI tool + **LLM via APIM** | ✅ Completo + validado live (429 governance) |
-| **F5** | Copilot Studio / M365 Copilot publish | 🟡 Em curso (ver secção 7) |
-| **F6** | Agent365 (mock de governance de agentes) | ⬜ Pendente |
-| **F7** | Runbook da demo | ⬜ Pendente |
+| **F5** | **Site live + CI/CD** (repo = Container App, muda a cada merge) | ✅ Completo + validado (OIDC→build→deploy) |
+| **F6** | Copilot Studio / M365 Copilot publish | 🟡 Em curso (ver secção 7) |
+| **F7** | Agent365 (mock) + Runbook da demo | ⬜ Pendente |
 
 ### Decisão de tuning da demo (TPM)
 - **TPM baixo** (ex.: 200) → força o **`429`** para mostrar governance ao vivo (o "money-shot").
