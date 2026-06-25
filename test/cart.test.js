@@ -29,7 +29,7 @@ test("applyVoucher applies 50% discount for valid voucher", () => {
 test("applyVoucher returns error and original total for invalid voucher", () => {
   const result = applyVoucher(100, "WRONGCODE");
   assert.equal(result.total, 100);
-  assert.equal(result.error, "Voucher inválido.");
+  assert.equal(result.error, "Invalid voucher.");
 });
 
 test("applyVoucher works correctly with cartTotal", () => {

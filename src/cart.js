@@ -27,7 +27,7 @@ export function validateVoucher(code) {
  */
 export function applyVoucher(total, voucherCode) {
   if (!validateVoucher(voucherCode)) {
-    return { total, error: "Voucher inválido." };
+    return { total, error: "Invalid voucher." };
   }
   return { total: total * (1 - VOUCHER_DISCOUNT), error: null };
 }
