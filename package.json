@@ -2,8 +2,12 @@
   "name": "contoso-cart",
   "version": "1.0.0",
   "type": "module",
-  "description": "Tiny shopping-cart module for the agentic demo",
+  "description": "Tiny shopping-cart web app used to demo an autonomous coding agent",
   "scripts": {
+    "start": "node server.js",
     "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
   }
 }

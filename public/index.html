@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contoso Cart</title>
+  <style>
+    :root { --brand: #5c2d91; --bg: #f5f5f7; --card: #fff; --line: #e5e5ea; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg); color: #1c1c1e; }
+    header { background: var(--brand); color: #fff; padding: 20px 24px; }
+    header h1 { margin: 0; font-size: 20px; }
+    main { max-width: 560px; margin: 32px auto; padding: 0 16px; }
+    .card { background: var(--card); border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      overflow: hidden; }
+    .row { display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .row:last-child { border-bottom: none; }
+    .name { font-weight: 500; }
+    .qty { color: #8e8e93; font-size: 14px; }
+    .totals { padding: 16px 20px; }
+    .totals .row { padding: 8px 0; border: none; }
+    .grand { font-size: 18px; font-weight: 700; }
+    button { width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 10px;
+      background: var(--brand); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header><h1>🛒 Contoso Cart</h1></header>
+  <main>
+    <div class="card">
+      <div id="items"></div>
+      <div class="totals">
+        <div class="row"><span>Subtotal</span><span id="subtotal">—</span></div>
+        <div class="row grand"><span>Total</span><span id="total">—</span></div>
+      </div>
+    </div>
+    <button id="checkout">Checkout</button>
+  </main>
+  <script>
+    const money = (n) => "$" + Number(n).toFixed(2);
+    fetch("/api/cart").then((r) => r.json()).then((data) => {
+      document.getElementById("items").innerHTML = data.items.map((i) =>
+        `<div class="row"><span class="name">${i.name} <span class="qty">×${i.quantity}</span></span>`
+        + `<span>${money(i.price * i.quantity)}</span></div>`).join("");
+      document.getElementById("subtotal").textContent = money(data.subtotal);
+      document.getElementById("total").textContent = money(data.subtotal);
+    });
+    document.getElementById("checkout").addEventListener("click", () => alert("Order placed!"));
+  </script>
+</body>
+</html>
