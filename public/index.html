@@ -20,8 +20,7 @@
       border-radius: 10px; padding: 10px 12px; }
     .placeholder-title { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
     .placeholder-links { margin: 0; padding: 0; list-style: none; display: flex; gap: 10px; flex-wrap: wrap; }
-    .placeholder-links a { color: rgba(255,255,255,0.92); font-size: 13px; }
-    .placeholder-links a:focus-visible { outline: 2px solid rgba(255,255,255,0.9); outline-offset: 2px; border-radius: 4px; }
+    .placeholder-link { color: rgba(255,255,255,0.92); font-size: 13px; text-decoration: underline; }
     main { max-width: 560px; margin: 32px auto; padding: 0 16px; }
     .card { background: var(--card); border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08);
       overflow: hidden; }
@@ -49,19 +48,19 @@
     </div>
     <div class="header-placeholders">
       <nav class="placeholder-section" aria-label="Menu">
-        <p class="placeholder-title" role="heading" aria-level="2">Menu</p>
+        <h2 class="placeholder-title">Menu</h2>
         <ul class="placeholder-links">
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Products</a></li>
-          <li><a href="#">Support</a></li>
+          <li><span class="placeholder-link">Home</span></li>
+          <li><span class="placeholder-link">Products</span></li>
+          <li><span class="placeholder-link">Support</span></li>
         </ul>
       </nav>
       <nav class="placeholder-section" aria-label="Social networks">
-        <p class="placeholder-title" role="heading" aria-level="2">Social networks</p>
+        <h2 class="placeholder-title">Social networks</h2>
         <ul class="placeholder-links">
-          <li><a href="#">LinkedIn</a></li>
-          <li><a href="#">X</a></li>
-          <li><a href="#">Instagram</a></li>
+          <li><span class="placeholder-link">LinkedIn</span></li>
+          <li><span class="placeholder-link">X</span></li>
+          <li><span class="placeholder-link">Instagram</span></li>
         </ul>
       </nav>
     </div>
