@@ -11,7 +11,7 @@ test("header includes Menu and Social networks placeholders", () => {
   assert.ok(headerStart >= 0);
   assert.ok(headerEnd > headerStart);
 
-  const headerHtml = html.slice(headerStart, headerEnd);
+  const headerHtml = html.slice(headerStart, headerEnd + "</header>".length);
   assert.match(headerHtml, /aria-label="Menu"/);
   assert.match(headerHtml, /aria-label="Social networks"/);
   assert.ok(headerStart < html.indexOf("<main>"));
