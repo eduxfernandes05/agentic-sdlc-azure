@@ -13,8 +13,8 @@ const app = express();
 
 // Sample cart used by the demo storefront.
 const items = [
-  { name: "Coffee", price: 3, quantity: 2 },
-  { name: "Mug", price: 10, quantity: 1 },
+  { name: "Coffee", price: 3, quantity: 2, image: "/images/coffee.svg" },
+  { name: "Mug", price: 10, quantity: 1, image: "/images/mug.svg" },
 ];
 
 app.use(express.static(join(__dirname, "public")));

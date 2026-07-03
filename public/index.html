@@ -23,6 +23,7 @@
     .row:last-child { border-bottom: none; }
     .name { font-weight: 500; }
     .qty { color: var(--qty); font-size: 14px; }
+    .product-img { width: 40px; height: 40px; margin-right: 12px; flex-shrink: 0; }
     .totals { padding: 16px 20px; }
     .totals .row { padding: 8px 0; border: none; }
     .grand { font-size: 18px; font-weight: 700; }
@@ -49,7 +50,8 @@
     const money = (n) => "$" + Number(n).toFixed(2);
     fetch("/api/cart").then((r) => r.json()).then((data) => {
       document.getElementById("items").innerHTML = data.items.map((i) =>
-        `<div class="row"><span class="name">${i.name} <span class="qty">×${i.quantity}</span></span>`
+        `<div class="row"><img class="product-img" src="${i.image}" alt="${i.name}">`
+        + `<span class="name">${i.name} <span class="qty">×${i.quantity}</span></span>`
         + `<span>${money(i.price * i.quantity)}</span></div>`).join("");
       document.getElementById("subtotal").textContent = money(data.subtotal);
       document.getElementById("total").textContent = money(data.subtotal);
