@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { cartTotal } from "../src/cart.js";
 
 test("cartTotal sums price * quantity", () => {
@@ -8,4 +9,9 @@ test("cartTotal sums price * quantity", () => {
     { name: "Mug", price: 10, quantity: 1 },
   ];
   assert.equal(cartTotal(items), 16);
+});
+
+test("index main container has role main", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.match(html, /<main\b[^>]*\brole=["']main["'][^>]*>/);
 });
