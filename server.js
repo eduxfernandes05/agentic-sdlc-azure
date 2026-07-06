@@ -32,4 +32,4 @@ app.post("/api/voucher", (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Contoso Cart running on port ${port}`));
+app.listen(port, () => console.log(`Contoso Cart Simulator running on port ${port}`));
