@@ -26,6 +26,15 @@
     .totals { padding: 16px 20px; }
     .totals .row { padding: 8px 0; border: none; }
     .grand { font-size: 18px; font-weight: 700; }
+    .discount-row { color: #2e8b57; }
+    #voucher-section { padding: 16px 20px; border-top: 1px solid var(--line); display: flex; gap: 8px; }
+    #voucher-input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px;
+      background: var(--bg); color: var(--text); font-size: 14px; }
+    #voucher-btn { padding: 10px 16px; border: none; border-radius: 8px;
+      background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #voucher-msg { padding: 4px 20px 12px; font-size: 13px; }
+    #voucher-msg.ok { color: #2e8b57; }
+    #voucher-msg.err { color: #c0392b; }
     #checkout { width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 10px;
       background: var(--brand); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
   </style>
@@ -38,8 +47,16 @@
   <main>
     <div class="card">
       <div id="items"></div>
+      <div id="voucher-section">
+        <input id="voucher-input" type="text" placeholder="Voucher code (e.g. SAVE10)" />
+        <button id="voucher-btn">Apply</button>
+      </div>
+      <div id="voucher-msg"></div>
       <div class="totals">
         <div class="row"><span>Subtotal</span><span id="subtotal">—</span></div>
+        <div class="row discount-row" id="discount-row" style="display:none">
+          <span>Discount (10%)</span><span id="discount">—</span>
+        </div>
         <div class="row grand"><span>Total</span><span id="total">—</span></div>
       </div>
     </div>
@@ -47,13 +64,40 @@
   </main>
   <script>
     const money = (n) => "$" + Number(n).toFixed(2);
+    let subtotalValue = 0;
+
     fetch("/api/cart").then((r) => r.json()).then((data) => {
+      subtotalValue = data.subtotal;
       document.getElementById("items").innerHTML = data.items.map((i) =>
         `<div class="row"><span class="name">${i.name} <span class="qty">×${i.quantity}</span></span>`
         + `<span>${money(i.price * i.quantity)}</span></div>`).join("");
       document.getElementById("subtotal").textContent = money(data.subtotal);
       document.getElementById("total").textContent = money(data.subtotal);
     });
+
+    document.getElementById("voucher-btn").addEventListener("click", () => {
+      const code = document.getElementById("voucher-input").value.trim();
+      const msg = document.getElementById("voucher-msg");
+      fetch("/api/voucher", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      }).then((r) => r.json()).then((data) => {
+        if (data.valid) {
+          document.getElementById("discount-row").style.display = "";
+          document.getElementById("discount").textContent = "-" + money(data.discount);
+          document.getElementById("total").textContent = money(data.total);
+          msg.textContent = "✅ Voucher applied — 10% off!";
+          msg.className = "ok";
+        } else {
+          document.getElementById("discount-row").style.display = "none";
+          document.getElementById("total").textContent = money(subtotalValue);
+          msg.textContent = "❌ Invalid voucher code.";
+          msg.className = "err";
+        }
+      });
+    });
+
     document.getElementById("checkout").addEventListener("click", () => alert("Order placed!"));
 
     const toggle = document.getElementById("theme-toggle");

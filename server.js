@@ -6,7 +6,7 @@
 import express from "express";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { cartTotal } from "./src/cart.js";
+import { cartTotal, applyVoucher } from "./src/cart.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -18,9 +18,17 @@ const items = [
 ];
 
 app.use(express.static(join(__dirname, "public")));
+app.use(express.json());
 
 app.get("/api/cart", (_req, res) => {
   res.json({ items, subtotal: cartTotal(items) });
+});
+
+app.post("/api/voucher", (req, res) => {
+  const { code } = req.body || {};
+  const subtotal = cartTotal(items);
+  const result = applyVoucher(subtotal, code);
+  res.json({ ...result, subtotal });
 });
 
 const port = process.env.PORT || 3000;
