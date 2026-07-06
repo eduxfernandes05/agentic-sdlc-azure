@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Contoso Cart Simulator</title>
   <style>
-    :root { --brand: #5c2d91; --bg: #f5f5f7; --card: #fff; --line: #e5e5ea; --text: #1c1c1e; --qty: #8e8e93; }
+    :root { --brand: #5c2d91; --bg: #f5f5f7; --card: #fff; --line: #e5e5ea; --text: #1c1c1e; --qty: #8e8e93; --logo-size: 36px; --logo-right: 16px; }
     body.dark { --bg: #1c1c1e; --card: #2c2c2e; --line: #3a3a3c; --text: #f5f5f7; --qty: #aeaeb2; }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; }
-    header { background: var(--brand); color: #fff; padding: 20px 24px;
+    header { background: var(--brand); color: #fff; padding: 20px calc(var(--logo-right) * 2 + var(--logo-size) + 24px) 20px 24px;
       display: flex; justify-content: space-between; align-items: center; }
+    #ms-logo { position: fixed; top: 10px; right: var(--logo-right); height: var(--logo-size); width: var(--logo-size);
+      z-index: 100; pointer-events: none; }
     header h1 { margin: 0; font-size: 20px; }
     #theme-toggle { background: rgba(255,255,255,0.2); border: none; border-radius: 8px;
       color: #fff; cursor: pointer; font-size: 14px; padding: 6px 12px; }
@@ -51,6 +53,7 @@
   </style>
 </head>
 <body>
+  <img id="ms-logo" src="/microsoft-logo.svg" alt="" aria-hidden="true" />
   <header>
     <h1>🛒 Contoso Cart Simulator</h1>
     <button id="theme-toggle">🌙 Night mode</button>
