@@ -14,7 +14,7 @@ The goal is not to copy resource names. The goal is to copy the operating model:
 | What repo is the target? | GitHub repo with Copilot coding agent enabled |
 | Who owns the final approval? | Human reviewer, code owner, platform team, product owner |
 | What governance do we need? | APIM token limits, quotas, content safety, chargeback, audit logs |
-| What telemetry must be shown? | App Insights E2E transaction, Agents preview, APIM metrics, KQL dashboard |
+| What telemetry must be shown? | App Insights E2E transaction, Agents preview, APIM metrics, KQL dashboard, Copilot Usage Records if enterprise auditability is required |
 
 Recommended starting point: one target repo, one Foundry hosted agent, one OpenAPI tool, one App Insights resource and one end-to-end trace story.
 
@@ -29,6 +29,7 @@ Recommended starting point: one target repo, one Foundry hosted agent, one OpenA
 | `copilot-sdk-service/foundry/agent-tool.openapi.json` | Copy/adapt | Foundry tool contract |
 | `observability/otel-collector/config.yaml` | Copy/adapt | OTLP receiver, auth, trace re-parenting and App Insights export |
 | `DIAGRAMA-OBSERVABILIDADE-E2E.md` | Copy/adapt | Architecture appendix and trace explainer |
+| `COPILOT-USAGE-RECORDS.md` | Copy/adapt | Enterprise auditability appendix for Copilot session data |
 | `APRESENTACAO-LINKEDIN.md` | Copy/adapt | Storytelling and recording template |
 
 Avoid copying customer/resource names directly. Treat names in this workspace as a validated reference implementation.
@@ -70,6 +71,8 @@ Avoid copying customer/resource names directly. Treat names in this workspace as
 3. Configure the API credential with permission to create issues and assign actors.
 4. Configure GitHub Agents variables for cloud-agent OTEL.
 5. Allowlist the collector FQDN in the Copilot cloud-agent firewall.
+6. If the customer has GitHub Enterprise Cloud with Enterprise Managed Users, enable Copilot Usage Records Streaming/API in enterprise AI Controls.
+7. Route Copilot Usage Records to the enterprise event collector, SIEM or Microsoft Purview if compliance/audit teams need session evidence.
 
 ### Foundry
 
@@ -137,7 +140,38 @@ Production note: the current variable is repo-global. For concurrent tasks, desi
 
 ---
 
-## 7. Validation Checklist
+## 7. Enterprise Audit Plane
+
+Use Copilot Usage Records when the customer needs visibility beyond a single traced workflow. It can expose or stream prompts, responses and tool calls from Copilot clients across the enterprise, including github.com cloud agents, data-resident deployments on ghe.com, GitHub Copilot CLI, VS Code, Visual Studio and partner IDEs.
+
+Position it as complementary to this demo's OTel path:
+
+| Layer | Best for | Retention/control owner |
+|---|---|---|
+| App Insights + OTel | Live technical trace of one workflow, latency, spans, parent/child relationships, model/tool execution tree | Platform/app team |
+| Copilot Usage Records Streaming | Continuous enterprise audit feed into SIEM, event collector or Microsoft Purview | Enterprise/security/compliance team |
+| Copilot Usage Records REST API | On-demand pull of recent session records, currently last 48 hours | Enterprise owners / audit automation |
+
+Prerequisites and switches:
+
+1. GitHub Enterprise Cloud customer.
+2. Enterprise Managed Users, or GitHub Enterprise Cloud with data residency where applicable.
+3. Enterprise owner access.
+4. In AI Controls under Copilot, set `Copilot Usage Records Streaming` to `Enable everywhere`.
+5. In AI Controls under Copilot, set `Copilot Usage Records API` to `Enable everywhere`.
+6. Configure audit log streaming destination if using the streaming path.
+
+REST endpoint to document for automation:
+
+```http
+GET /enterprises/{enterprise}/copilot/usage-records
+```
+
+See [COPILOT-USAGE-RECORDS.md](COPILOT-USAGE-RECORDS.md) for the customer-facing architecture and talking points.
+
+---
+
+## 8. Validation Checklist
 
 ### API smoke test
 
@@ -182,9 +216,19 @@ Expected span names:
 - `execute_tool ...`.
 - `permission`.
 
+### Copilot Usage Records validation
+
+For enterprise customers that enable the API path, validate that the enterprise endpoint returns recent records:
+
+```powershell
+gh api "/enterprises/<enterprise>/copilot/usage-records"
+```
+
+For streaming, validate that the configured destination receives compressed JSON records and that downstream SIEM/Purview parsing preserves session, client, prompt, response and tool-call fields required by the customer.
+
 ---
 
-## 8. Demo Script Template
+## 9. Demo Script Template
 
 1. Show the target app or repo.
 2. Send one natural-language request to the Foundry agent.
@@ -192,13 +236,14 @@ Expected span names:
 4. Show the Copilot cloud-agent PR.
 5. Show App Insights `End-to-end transaction details`.
 6. Explain the governance points: APIM, human review, auditability, traceability.
-7. Close with the reusable pattern and where it can apply next.
+7. For enterprise/security audiences, show where Copilot Usage Records would feed SIEM/Purview.
+8. Close with the reusable pattern and where it can apply next.
 
 Keep the prompt specific and visible. Good prompts are small enough to finish quickly but visual enough to demo.
 
 ---
 
-## 9. Production Hardening Backlog
+## 10. Production Hardening Backlog
 
 | Priority | Item | Why |
 |---|---|---|
@@ -208,12 +253,13 @@ Keep the prompt specific and visible. Good prompts are small enough to finish qu
 | High | Store OTLP auth as secret | Avoid plaintext token exposure |
 | Medium | Resolve correlation race | Repo-global `OTEL_RESOURCE_ATTRIBUTES` is demo-friendly but not concurrency-safe |
 | Medium | Add dashboards/workbook | Make token, latency, failure and cost views reusable |
+| Medium | Add Copilot Usage Records integration option | Let enterprise customers join app traces with tenant-wide Copilot session audit records |
 | Medium | Add customer-facing setup scripts | Lower friction for MALT reuse |
 | Low | Investigate explicit hosted Foundry root span | Nice-to-have for visual completeness |
 
 ---
 
-## 10. Packaging Checklist Before Sharing
+## 11. Packaging Checklist Before Sharing
 
 - Replace customer/resource-specific names where needed.
 - Remove or rotate tokens and connection strings.
@@ -221,3 +267,4 @@ Keep the prompt specific and visible. Good prompts are small enough to finish qu
 - Decide whether to ship `contoso-cart` as a sample target or replace it with a neutral template repo.
 - Include a tested sample `operation_Id` only if the target audience has access to that App Insights resource.
 - Document what is demo-grade versus production-grade.
+- Mark Copilot Usage Records as public preview and enterprise-controlled before presenting it as a production dependency.

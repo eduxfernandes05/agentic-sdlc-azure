@@ -101,9 +101,13 @@ Formatos de engagement:
 | Technical deep dive | 60 min | Arquitetura, APIM, OTel Collector e KQL |
 | Reuse workshop | Meio dia | Adaptar para outro repo e obter primeiro trace |
 | Accelerator | 1-2 semanas | Hardened deployment, IaC, dashboards e auth de producao |
+| Security/compliance add-on | 30 min | Copilot Usage Records para SIEM/Purview e auditoria enterprise |
 
 O material para outros MALT pegarem esta em [REUSE-GUIDE.md](REUSE-GUIDE.md). O diagrama técnico completo
 esta em [DIAGRAMA-OBSERVABILIDADE-E2E.md](DIAGRAMA-OBSERVABILIDADE-E2E.md).
+
+Se a audiência for CISO, compliance ou platform governance, usar também [COPILOT-USAGE-RECORDS.md](COPILOT-USAGE-RECORDS.md):
+mostra como combinar o trace da demo com sessão Copilot enterprise-wide via streaming/API.
 
 ---
 

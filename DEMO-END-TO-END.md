@@ -29,6 +29,7 @@
 | 🎬 Runbook LinkedIn | [APRESENTACAO-LINKEDIN.md](APRESENTACAO-LINKEDIN.md) |
 | 🧭 Diagrama OTEL completo | [DIAGRAMA-OBSERVABILIDADE-E2E.md](DIAGRAMA-OBSERVABILIDADE-E2E.md) |
 | ♻️ Guia de reutilização | [REUSE-GUIDE.md](REUSE-GUIDE.md) |
+| 🛡️ Auditabilidade enterprise Copilot | [COPILOT-USAGE-RECORDS.md](COPILOT-USAGE-RECORDS.md) |
 
 ---
 
@@ -66,6 +67,10 @@ Pedido de negócio
 Para adaptar a outro cliente ou equipa MALT, trocar principalmente: agente Foundry, target repo, App Insights,
 APIM, tool schema e política de criação de work items. O contrato completo de reutilização está em
 [REUSE-GUIDE.md](REUSE-GUIDE.md).
+
+Para audiências de segurança/compliance, acrescentar a camada [COPILOT-USAGE-RECORDS.md](COPILOT-USAGE-RECORDS.md):
+ela não substitui o trace OTel, mas adiciona auditabilidade enterprise-wide de prompts, respostas e tool calls
+em todos os clientes Copilot suportados.
 
 ---
 

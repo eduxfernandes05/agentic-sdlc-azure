@@ -7,6 +7,8 @@ Este documento explica como a demo faz tracing end-to-end desde o agente hosted 
 
 O ponto mais importante: hoje a correlação principal funciona. O mesmo `operation_Id` contém APIM, `POST /agent`, os spans `contoso.orchestrator` / `copilot.cloud_agent.task` e a árvore profunda do GitHub Copilot cloud agent (`invoke_agent`, `chat claude-sonnet-4.6`, `execute_tool`, `permission`, etc.).
 
+Camada complementar: para clientes GitHub Enterprise Cloud com Enterprise Managed Users, Copilot Usage Records pode fornecer visibilidade de prompts, respostas e tool calls em todos os clientes Copilot. Isto complementa o OTel/App Insights com auditabilidade enterprise-wide. Ver [COPILOT-USAGE-RECORDS.md](COPILOT-USAGE-RECORDS.md).
+
 Ainda há uma nuance: não aparece um span raiz explícito do runtime hosted Foundry como `azure.ai.agent` nas tabelas consultadas do App Insights. O trace entra no App Insights já com APIM e a tool call correlacionados.
 
 ---
@@ -39,8 +41,14 @@ flowchart TB
         Issue["GitHub Issue<br/>#41 na run validada"]
         AgentStore["Copilot Agents variables store<br/>/repos/{owner}/{repo}/agents/variables"]
         CloudAgent["GitHub Copilot cloud agent<br/>github.copilot.coding_agent"]
+        UsageRecords["Copilot Usage Records<br/>streaming/API"]
         PR["Pull Request"]
         Actions["GitHub Actions CI/CD<br/>deploy.yml"]
+    end
+
+    subgraph Audit["Enterprise audit / compliance"]
+        SIEM["SIEM / event collector"]
+        Purview["Microsoft Purview<br/>public preview"]
     end
 
     AI[("Application Insights<br/>insights-zj44ehcf4zlxq")]
@@ -56,6 +64,9 @@ flowchart TB
     API --> AgentStore
     Issue --> CloudAgent
     AgentStore --> CloudAgent
+    CloudAgent --> UsageRecords
+    UsageRecords --> SIEM
+    UsageRecords --> Purview
     CloudAgent --> PR
     PR --> Actions
     Actions --> Cart
@@ -225,6 +236,44 @@ Detalhe dos caminhos:
 | `copilot-sdk-service` | Azure Monitor OpenTelemetry distro | `src/api/telemetry.ts` + env `APPLICATIONINSIGHTS_CONNECTION_STRING` | `POST /agent`, `contoso.orchestrator`, `copilot.cloud_agent.task` |
 | Copilot cloud agent | OTLP HTTP/protobuf | GitHub Agents variables + firewall allowlist | Árvore profunda `github.copilot.coding_agent` |
 | OTel Collector | Azure Monitor exporter | `observability/otel-collector/config.yaml` | Re-parent dos spans do cloud agent para a transação da API |
+| Copilot Usage Records | Audit log streaming ou REST API enterprise | GitHub Enterprise AI Controls + audit log streaming destination | Prompts, responses e tool calls enterprise-wide para SIEM/Purview/auditoria |
+
+### 4.1 Como Usage Records encaixa
+
+```mermaid
+flowchart LR
+    subgraph Clients["Copilot clients"]
+        GHCloud["Cloud agents<br/>github.com / ghe.com"]
+        CLI["GitHub Copilot CLI"]
+        VSCode["VS Code"]
+        VS["Visual Studio"]
+        IDE["Partner IDEs<br/>JetBrains / Eclipse"]
+    end
+
+    Records["Copilot Usage Records<br/>prompts + responses + tool calls"]
+    Stream["Streaming endpoint<br/>continuous enterprise feed"]
+    API["REST API<br/>last 48 hours"]
+    SIEM["SIEM / event collector"]
+    Purview["Microsoft Purview"]
+    Audit["Audit automation / investigations"]
+
+    GHCloud --> Records
+    CLI --> Records
+    VSCode --> Records
+    VS --> Records
+    IDE --> Records
+    Records --> Stream --> SIEM
+    Stream --> Purview
+    Records --> API --> Audit
+```
+
+Usage Records responde a uma pergunta diferente do OTel:
+
+| Pergunta | Melhor fonte |
+|---|---|
+| Esta execução específica passou por APIM, `/agent`, `copilot.cloud_agent.task` e tool calls? | App Insights + OTel |
+| Que sessões Copilot aconteceram no enterprise, em que cliente, com que prompts/respostas/tool calls? | Copilot Usage Records |
+| Como mando isto para SIEM/Purview sem instrumentar cada app? | Audit log streaming + Copilot Usage Records |
 
 ---
 

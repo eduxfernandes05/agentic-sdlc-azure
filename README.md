@@ -22,6 +22,7 @@ The value is not just automation. The value is an operated agentic workflow:
 - Delegation: Foundry owns the business intent; GitHub Copilot owns repo-level implementation.
 - Human-in-the-loop: work lands as issues and pull requests before merge.
 - Observability: App Insights shows APIM, the delegation API, `copilot.cloud_agent.task`, and the deep Copilot cloud-agent execution tree in one trace.
+- Enterprise auditability: Copilot Usage Records can stream or expose agent session data across Copilot clients for enterprise compliance and SIEM/Purview integration.
 
 ---
 
@@ -37,6 +38,7 @@ The value is not just automation. The value is an operated agentic workflow:
 | Cloud agent OTEL | GitHub Copilot cloud agent exports OTLP traces to an OpenTelemetry Collector |
 | Trace stitching | Collector rewrites cloud-agent trace ids using `corr.trace_id` and `corr.span_id` |
 | App Insights E2E view | One `operation_Id` contains APIM, API spans and cloud-agent deep spans |
+| Enterprise audit plane | GitHub Copilot Usage Records streaming/API adds enterprise-wide prompts, responses and tool-call visibility |
 | Live app proof | `contoso-cart` deploys to Azure Container Apps after merge |
 
 ---
@@ -104,8 +106,14 @@ flowchart TB
         Issue["Issue"]
         Vars["Agents variables store"]
         Cloud["GitHub Copilot cloud agent"]
+      Usage["Copilot Usage Records<br/>streaming + REST API"]
         PR["Pull Request"]
         Actions["GitHub Actions deploy"]
+    end
+
+    subgraph EnterpriseAudit["Enterprise Audit Plane"]
+      SIEM["SIEM / event collector"]
+      Purview["Microsoft Purview<br/>public preview endpoint"]
     end
 
     AI[("Application Insights<br/>insights-zj44ehcf4zlxq")]
@@ -116,6 +124,9 @@ flowchart TB
     API --> Issue --> Cloud --> PR --> Actions --> Site
     API --> Vars --> Cloud
     Repo --> Cloud
+    Cloud --> Usage
+    Usage --> SIEM
+    Usage --> Purview
 
     APIM -- "native AI diagnostic" --> AI
     API -- "Azure Monitor OTel distro" --> AI
@@ -176,8 +187,11 @@ Telemetry paths:
 | `copilot-sdk-service` | `@azure/monitor-opentelemetry` | `insights-zj44ehcf4zlxq` | Emits API request and logical GenAI spans |
 | Copilot cloud agent | OTLP HTTP/protobuf | `ca-otel-collector` | Emits `invoke_agent`, `chat`, `execute_tool`, `permission` |
 | OTel Collector | Azure Monitor exporter | `insights-zj44ehcf4zlxq` | Applies `transform/correlate` before export |
+| Copilot Usage Records | Audit-log streaming or REST API | SIEM, event collector, Microsoft Purview, or on-demand API pull | Enterprise-wide prompts, responses and tool calls across Copilot clients |
 
 Nuance: the Foundry hosted runtime is connected to the same App Insights resource, but the validated App Insights queries did not show a distinct hosted Foundry root span named `azure.ai.agent`. The operational chain APIM -> tool -> API -> cloud agent is correlated and demonstrable.
+
+Usage Records nuance: this is not a replacement for OTel trace stitching. OTel gives live distributed tracing for this specific workflow; Copilot Usage Records gives compliance-grade session evidence across GitHub.com cloud agents, CLI, VS Code, Visual Studio and partner IDEs. See [COPILOT-USAGE-RECORDS.md](COPILOT-USAGE-RECORDS.md).
 
 ---
 
@@ -190,6 +204,7 @@ Nuance: the Foundry hosted runtime is connected to the same App Insights resourc
 | [copilot-sdk-service/src/api/telemetry.ts](copilot-sdk-service/src/api/telemetry.ts) | Azure Monitor OTel bootstrap and GenAI span helper | Keep imported first in API startup |
 | [copilot-sdk-service/foundry/agent-tool.openapi.json](copilot-sdk-service/foundry/agent-tool.openapi.json) | OpenAPI tool registered in Foundry | Update server URL and schema per engagement |
 | [observability/otel-collector/config.yaml](observability/otel-collector/config.yaml) | OTLP receiver, auth, trace re-parenting and App Insights export | Productionize auth/secret handling before broader reuse |
+| [COPILOT-USAGE-RECORDS.md](COPILOT-USAGE-RECORDS.md) | Enterprise audit plane for Copilot session records | Use with customers that need SIEM/Purview/compliance visibility |
 | [server.js](server.js), [src/](src/), [public/](public/) | Target `contoso-cart` app used for the demo | Swap for a customer/product repo in new engagements |
 | [.github/workflows/deploy.yml](.github/workflows/deploy.yml) | CI/CD path for the live Container App | Replace with the customer's deployment workflow |
 | [test/](test/) | App validation suite | Keeps the demo app safe while the repo also hosts IP assets |
@@ -300,6 +315,7 @@ The collector must receive OTLP HTTP on `4318`, validate bearer auth, apply `tra
 | Correlation variable | Global repo-level `OTEL_RESOURCE_ATTRIBUTES` | Avoid concurrent delegation race with per-run setup or isolated runners |
 | Infrastructure | Collector partly manual | Add collector and variables setup to IaC/scripted bootstrap |
 | Data capture | `COPILOT_OTEL_CAPTURE_CONTENT=true` | Review privacy, retention and redaction policy per customer |
+| Enterprise session records | Optional public-preview control for GitHub Enterprise Cloud customers with Enterprise Managed Users | Enable Copilot Usage Records Streaming/API in AI Controls and route to SIEM/Purview under enterprise policy |
 
 ---
 
@@ -346,6 +362,7 @@ Invoke-WebRequest -Uri "https://ca-contoso-cart.gentlepond-a81d8e3c.swedencentra
 | [README.md](README.md) | Everyone | Landing page and reusable IP overview |
 | [REUSE-GUIDE.md](REUSE-GUIDE.md) | MALT / delivery engineers | How to adapt this demo to another repo/customer |
 | [DIAGRAMA-OBSERVABILIDADE-E2E.md](DIAGRAMA-OBSERVABILIDADE-E2E.md) | Architects / SRE / AI engineers | Full tracing architecture and validated App Insights evidence |
+| [COPILOT-USAGE-RECORDS.md](COPILOT-USAGE-RECORDS.md) | Security / compliance / enterprise admins | How Copilot Usage Records complement OTel with enterprise-wide session auditability |
 | [DEMO-END-TO-END.md](DEMO-END-TO-END.md) | Presenters / sellers / architects | End-to-end demo guide and resource inventory |
 | [APRESENTACAO-LINKEDIN.md](APRESENTACAO-LINKEDIN.md) | Presenter | Recording flow and social copy |
 | [ESTADO-ATUAL.md](ESTADO-ATUAL.md) | Maintainers | Current validated state and hardening backlog |

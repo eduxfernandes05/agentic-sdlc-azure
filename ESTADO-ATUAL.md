@@ -130,3 +130,4 @@ O pacote documental agora tem tres camadas:
 | Landing page | [README.md](README.md) | Explicar a demo e a arquitetura a qualquer pessoa |
 | Reuse playbook | [REUSE-GUIDE.md](REUSE-GUIDE.md) | Adaptar a outro repo ou customer engagement |
 | Deep technical appendix | [DIAGRAMA-OBSERVABILIDADE-E2E.md](DIAGRAMA-OBSERVABILIDADE-E2E.md) | Tracing, collector, KQL e span tree |
+| Enterprise audit appendix | [COPILOT-USAGE-RECORDS.md](COPILOT-USAGE-RECORDS.md) | Copilot Usage Records, SIEM/Purview e auditabilidade enterprise |
