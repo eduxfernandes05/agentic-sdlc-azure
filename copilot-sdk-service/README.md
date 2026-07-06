@@ -23,12 +23,11 @@ description: A full-stack TypeScript template using the GitHub Copilot SDK with 
 
 # Copilot SDK Service — Chat API with React UI on Azure Container Apps
 
-> Demo customization: in this workspace the template was extended into a governed agentic SDLC service.
-> The API now exposes `POST /agent`, which creates a GitHub issue, assigns the GitHub Copilot cloud agent,
+> This service is extended into a governed agentic SDLC delivery API.
+> It exposes `POST /agent`, which creates a GitHub issue, assigns the GitHub Copilot cloud agent,
 > emits `contoso.orchestrator` and `copilot.cloud_agent.task` spans, and correlates the cloud-agent OTLP
-> subtree into Application Insights. See [../README.md](../README.md) and
-> [../DIAGRAMA-OBSERVABILIDADE-E2E.md](../DIAGRAMA-OBSERVABILIDADE-E2E.md) for the ready-to-present demo package.
-> For reuse by another team or engagement, start with [../REUSE-GUIDE.md](../REUSE-GUIDE.md).
+> subtree into Application Insights. See [../README.md](../README.md),
+> [../docs/architecture.md](../docs/architecture.md) and [../docs/deployment.md](../docs/deployment.md).
 
 [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=brightgreen&logo=github)](https://codespaces.new/azure-samples/copilot-sdk-service)
 [![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev+Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/azure-samples/copilot-sdk-service)
