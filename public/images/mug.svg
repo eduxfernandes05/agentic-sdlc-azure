@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Mug</title>
+  <rect width="64" height="64" rx="14" fill="#eef3f7"/>
+  <path d="M18 22h26v22a8 8 0 0 1-8 8H26a8 8 0 0 1-8-8V22Z" fill="#ffffff" stroke="#5c2d91" stroke-width="4"/>
+  <path d="M44 28h4a7 7 0 0 1 0 14h-4" fill="none" stroke="#5c2d91" stroke-width="4"/>
+  <path d="M24 18h14" stroke="#8e8e93" stroke-width="4" stroke-linecap="round"/>
+</svg>

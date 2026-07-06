@@ -3,20 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Contoso Cart Simulator is a simple online shopping cart demo." />
   <title>Contoso Cart Simulator</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%92%3C/text%3E%3C/svg%3E" />
   <style>
     :root { --brand: #5c2d91; --bg: #f5f5f7; --card: #fff; --line: #e5e5ea; --text: #1c1c1e; --qty: #8e8e93; --logo-size: 36px; --logo-right: 16px; }
     body.dark { --bg: #1c1c1e; --card: #2c2c2e; --line: #3a3a3c; --text: #f5f5f7; --qty: #aeaeb2; }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; }
-    header { background: var(--brand); color: #fff; padding: 20px calc(var(--logo-right) * 2 + var(--logo-size) + 24px) 20px 24px;
-      display: flex; justify-content: space-between; align-items: center; }
+    header { background: var(--brand); color: #fff; padding: 20px calc(var(--logo-right) * 2 + var(--logo-size) + 24px) 20px 24px; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
     #ms-logo { position: fixed; top: 10px; right: var(--logo-right); height: var(--logo-size); width: var(--logo-size);
       z-index: 100; pointer-events: none; }
     header h1 { margin: 0; font-size: 20px; }
     #theme-toggle { background: rgba(255,255,255,0.2); border: none; border-radius: 8px;
       color: #fff; cursor: pointer; font-size: 14px; padding: 6px 12px; }
+    .header-placeholders { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+    .placeholder-section { flex: 1; min-width: 220px; border: 1px dashed rgba(255,255,255,0.45);
+      border-radius: 10px; padding: 10px 12px; }
+    .placeholder-title { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
+    .placeholder-links { margin: 0; padding: 0; list-style: none; display: flex; gap: 10px; flex-wrap: wrap; }
+    .placeholder-links a { color: rgba(255,255,255,0.92); font-size: 13px; text-decoration: underline; }
+    .placeholder-links a:focus-visible { outline: 2px solid rgba(255,255,255,0.9); outline-offset: 2px; border-radius: 4px; }
     main { max-width: 560px; margin: 32px auto; padding: 0 16px; }
     .card { background: var(--card); border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08);
       overflow: hidden; }
@@ -25,6 +34,7 @@
     .row:last-child { border-bottom: none; }
     .name { font-weight: 500; }
     .qty { color: var(--qty); font-size: 14px; }
+    .product-img { width: 40px; height: 40px; margin-right: 12px; flex-shrink: 0; }
     .totals { padding: 16px 20px; }
     .totals .row { padding: 8px 0; border: none; }
     .grand { font-size: 18px; font-weight: 700; }
@@ -50,15 +60,42 @@
     #settings-panel.open { display: block; }
     #settings-panel h2 { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
     #settings-panel label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+    footer { text-align: center; padding: 24px 16px; font-size: 13px; color: var(--qty); }
+    footer a { color: var(--brand); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 560px) {
+      .header-top { flex-wrap: wrap; }
+      .placeholder-section { min-width: 100%; }
+    }
   </style>
 </head>
 <body>
   <img id="ms-logo" src="/microsoft-logo.svg" alt="" aria-hidden="true" />
   <header>
-    <h1>🛒 Contoso Cart Simulator</h1>
-    <button id="theme-toggle">🌙 Night mode</button>
+    <div class="header-top">
+      <h1 title="Contoso Cart">🛒 Contoso Cart Simulator</h1>
+      <button id="theme-toggle">🌙 Night mode</button>
+    </div>
+    <div class="header-placeholders">
+      <nav class="placeholder-section" aria-label="Menu">
+        <h2 class="placeholder-title">Menu</h2>
+        <ul class="placeholder-links">
+          <li><a href="/menu/home">Home</a></li>
+          <li><a href="/menu/products">Products</a></li>
+          <li><a href="/menu/support">Support</a></li>
+        </ul>
+      </nav>
+      <nav class="placeholder-section" aria-label="Social networks">
+        <h2 class="placeholder-title">Social networks</h2>
+        <ul class="placeholder-links">
+          <li><a href="https://example.com/social/linkedin" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          <li><a href="https://example.com/social/x" target="_blank" rel="noopener noreferrer">X</a></li>
+          <li><a href="https://example.com/social/instagram" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
-  <main>
+  <main role="main">
     <div class="card">
       <div id="items"></div>
       <div id="voucher-section">
@@ -88,7 +125,8 @@
     fetch("/api/cart").then((r) => r.json()).then((data) => {
       subtotalValue = data.subtotal;
       document.getElementById("items").innerHTML = data.items.map((i) =>
-        `<div class="row"><span class="name">${i.name} <span class="qty">×${i.quantity}</span></span>`
+        `<div class="row"><img class="product-img" src="${i.image}" alt="${i.name}">`
+        + `<span class="name">${i.name} <span class="qty">×${i.quantity}</span></span>`
         + `<span>${money(i.price * i.quantity)}</span></div>`).join("");
       document.getElementById("subtotal").textContent = money(data.subtotal);
       document.getElementById("total").textContent = money(data.subtotal);
@@ -106,7 +144,7 @@
           document.getElementById("discount-row").style.display = "";
           document.getElementById("discount").textContent = "-" + money(data.discount);
           document.getElementById("total").textContent = money(data.total);
-          msg.textContent = "✅ Voucher applied — 10% off!";
+          msg.textContent = "✅ Voucher applied.";
           msg.className = "ok";
         } else {
           document.getElementById("discount-row").style.display = "none";
@@ -146,5 +184,8 @@
       }
     });
   </script>
+  <footer>
+    <a href="mailto:contact@contoso.com">Contact</a>
+  </footer>
 </body>
 </html>
