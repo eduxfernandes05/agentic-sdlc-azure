@@ -37,6 +37,17 @@
     #voucher-msg.err { color: #c0392b; }
     #checkout { width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 10px;
       background: var(--brand); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
+    #settings-btn { position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px;
+      border-radius: 50%; border: none; background: var(--brand); color: #fff;
+      font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25); z-index: 100; }
+    #settings-btn:hover { opacity: 0.85; }
+    #settings-panel { display: none; position: fixed; bottom: 84px; right: 24px;
+      background: var(--card); border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.18);
+      padding: 20px 24px; min-width: 200px; z-index: 99; color: var(--text); }
+    #settings-panel.open { display: block; }
+    #settings-panel h2 { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
+    #settings-panel label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -62,6 +73,11 @@
     </div>
     <button id="checkout">Checkout</button>
   </main>
+  <button id="settings-btn" aria-label="Settings">⚙️</button>
+  <div id="settings-panel" role="dialog" aria-label="Settings panel">
+    <h2>Settings</h2>
+    <label><input type="checkbox" id="settings-darkmode" /> Dark mode</label>
+  </div>
   <script>
     const money = (n) => "$" + Number(n).toFixed(2);
     let subtotalValue = 0;
@@ -106,10 +122,25 @@
       toggle.textContent = dark ? "☀️ Light mode" : "🌙 Night mode";
     }
     applyTheme(localStorage.getItem("theme") === "dark");
-    toggle.addEventListener("click", () => {
-      const dark = !document.body.classList.contains("dark");
+    function setTheme(dark) {
       localStorage.setItem("theme", dark ? "dark" : "light");
       applyTheme(dark);
+      settingsDarkmode.checked = dark;
+    }
+    toggle.addEventListener("click", () => setTheme(!document.body.classList.contains("dark")));
+
+    const settingsBtn = document.getElementById("settings-btn");
+    const settingsPanel = document.getElementById("settings-panel");
+    const settingsDarkmode = document.getElementById("settings-darkmode");
+    settingsDarkmode.checked = localStorage.getItem("theme") === "dark";
+    settingsBtn.addEventListener("click", () => {
+      settingsPanel.classList.toggle("open");
+    });
+    settingsDarkmode.addEventListener("change", () => setTheme(settingsDarkmode.checked));
+    document.addEventListener("click", (e) => {
+      if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+        settingsPanel.classList.remove("open");
+      }
     });
   </script>
 </body>
