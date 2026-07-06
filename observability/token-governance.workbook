@@ -1,0 +1,137 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# 🛡️ Governança de Tokens — Demo E2E Agentic (APIM no meio)\n\nTelemetria emitida pelo **API Management** (`apim-zj44ehcf4zlxq`) via policy `azure-openai-emit-token-metric`.\nCada chamada do agente ao modelo passa pelo APIM e fica registada aqui, **por consumidor**.\n\n> Fonte: App Insights `insights-zj44ehcf4zlxq` · Métricas: Total/Prompt/Completion Tokens · Dimensões: Consumer, Model, Region."
+      },
+      "name": "titulo"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "timeRange",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Intervalo",
+            "type": 4,
+            "value": { "durationMs": 2592000000 },
+            "typeSettings": {
+              "selectableValues": [
+                { "durationMs": 3600000 },
+                { "durationMs": 86400000 },
+                { "durationMs": 604800000 },
+                { "durationMs": 2592000000 }
+              ]
+            }
+          }
+        ],
+        "style": "pills"
+      },
+      "name": "parametros"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "customMetrics\n| where name == \"Total Tokens\"\n| summarize ['Total Tokens'] = sum(value)",
+        "size": 4,
+        "title": "Total de Tokens (intervalo selecionado)",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "tiles"
+      },
+      "name": "tile-total-tokens"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "customMetrics\n| where name == \"Total Tokens\"\n| extend Consumer = tostring(customDimensions[\"Consumer\"])\n| summarize TotalTokens = sum(value) by Consumer\n| order by TotalTokens desc",
+        "size": 0,
+        "title": "Tokens por Consumidor",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "barchart"
+      },
+      "name": "tokens-por-consumidor"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "customMetrics\n| where name in (\"Prompt Tokens\", \"Completion Tokens\", \"Total Tokens\")\n| extend Consumer = tostring(customDimensions[\"Consumer\"])\n| summarize Tokens = sum(value) by Consumer, name\n| evaluate pivot(name, sum(Tokens))\n| order by ['Total Tokens'] desc",
+        "size": 0,
+        "title": "Prompt vs Completion por Consumidor",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      },
+      "name": "prompt-vs-completion"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "customMetrics\n| where name == \"Total Tokens\"\n| extend Consumer = tostring(customDimensions[\"Consumer\"])\n| summarize Tokens = sum(value) by bin(timestamp, 1h), Consumer\n| render timechart",
+        "size": 0,
+        "title": "Consumo de Tokens no Tempo",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "timechart"
+      },
+      "name": "tokens-no-tempo"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "customMetrics\n| where name == \"Total Tokens\"\n| extend Model = tostring(customDimensions[\"Model\"])\n| summarize TotalTokens = sum(value) by Model\n| order by TotalTokens desc",
+        "size": 1,
+        "title": "Tokens por Modelo",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "piechart"
+      },
+      "name": "tokens-por-modelo"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests\n| summarize Total = count() by resultCode\n| extend Resultado = case(resultCode == \"429\", \"429 — rate limit (TPM)\", resultCode == \"403\", \"403 — quota excedida\", resultCode startswith \"2\", \"2xx — OK\", strcat(resultCode, \" — outro\"))\n| project Resultado, Total\n| order by Total desc",
+        "size": 1,
+        "title": "Resultados HTTP no APIM (429 = governança a atuar)",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      },
+      "name": "taxa-429"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests\n| summarize p50 = percentile(duration, 50), p95 = percentile(duration, 95), p99 = percentile(duration, 99) by bin(timestamp, 1h)\n| render timechart",
+        "size": 0,
+        "title": "Latência do APIM (p50/p95/p99 ms)",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "timechart"
+      },
+      "name": "latencia"
+    }
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

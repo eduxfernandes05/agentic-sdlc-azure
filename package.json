@@ -5,7 +5,7 @@
   "description": "Tiny shopping-cart web app used to demo an autonomous coding agent",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test"
+    "test": "node --test test/*.js"
   },
   "dependencies": {
     "express": "^4.19.2"

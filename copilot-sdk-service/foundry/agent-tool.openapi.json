@@ -1,0 +1,83 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Contoso Orchestrator",
+    "description": "Governed orchestrator that turns a feature request into a GitHub issue and delegates it to the GitHub Copilot coding agent, which autonomously implements the change and opens a Pull Request.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "https://ca-api-edudemo-csdk-4bq4xx.gentlepond-a81d8e3c.swedencentral.azurecontainerapps.io" }
+  ],
+  "paths": {
+    "/agent": {
+      "post": {
+        "operationId": "delegateToCopilot",
+        "summary": "Create a GitHub issue and delegate it to the Copilot coding agent",
+        "description": "Takes a software feature request (title and description), opens a GitHub issue in the configured repository, and assigns the GitHub Copilot coding agent to it. Copilot then implements the change and opens a Pull Request. Returns the created issue number and URL.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title"],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Short, imperative title for the feature/change (e.g. 'Add free shipping when subtotal exceeds 50')."
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "Detailed description of the desired behaviour and acceptance criteria for the change (what it must do, edge cases, and that existing tests must keep passing). Do NOT specify file paths or function names - the coding agent inspects the repository and decides the implementation details itself."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Issue created and delegated to the Copilot coding agent.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "delegated" },
+                    "message": { "type": "string" },
+                    "repository": { "type": "string", "example": "owner/name" },
+                    "issueNumber": { "type": "integer", "example": 5 },
+                    "issueUrl": { "type": "string", "example": "https://github.com/owner/name/issues/5" },
+                    "assignedTo": { "type": "string", "example": "Copilot" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (missing title).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "error": { "type": "string" } }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error (GitHub token/repo not configured or GitHub API error).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "error": { "type": "string" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

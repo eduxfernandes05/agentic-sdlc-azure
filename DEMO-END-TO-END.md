@@ -6,6 +6,11 @@
 > A frase-chave para o cliente: **"APIM no meio"** — governance central de custo, segurança e
 > observabilidade sobre todo o tráfego de modelos e agentes.
 
+> **Ready to present — 2026-07-06.** A demo tem trace end-to-end validado no Application Insights:
+> `operation_Id=5d210e1ff1014856861d30ae9ad05c77`. Esse trace inclui APIM, `POST /agent`,
+> `contoso.orchestrator`, `copilot.cloud_agent.task` e a árvore profunda do GitHub Copilot cloud agent
+> (`invoke_agent`, `chat claude-sonnet-4.6`, `execute_tool`, `permission`).
+
 ---
 
 ## 0. Links rápidos (live)
@@ -19,6 +24,11 @@
 | ⚙️ GitHub Actions (CI/CD) | `https://github.com/eduxfernandes05/contoso-cart/actions` |
 | 🧠 APIM Gateway | `https://apim-zj44ehcf4zlxq.azure-api.net` |
 | 🧠 OpenAI via APIM | `https://apim-zj44ehcf4zlxq.azure-api.net/inference/openai` |
+| 📈 App Insights | `insights-zj44ehcf4zlxq` |
+| 🔎 Trace validado | `5d210e1ff1014856861d30ae9ad05c77` |
+| 🎬 Runbook LinkedIn | [APRESENTACAO-LINKEDIN.md](APRESENTACAO-LINKEDIN.md) |
+| 🧭 Diagrama OTEL completo | [DIAGRAMA-OBSERVABILIDADE-E2E.md](DIAGRAMA-OBSERVABILIDADE-E2E.md) |
+| ♻️ Guia de reutilização | [REUSE-GUIDE.md](REUSE-GUIDE.md) |
 
 ---
 
@@ -37,6 +47,25 @@ Não escreve código, não sabe que ficheiros existem. O pedido entra num **agen
 
 O valor demonstrado: **autonomia agêntica real** + **governance empresarial** (o APIM) + **separação
 clara QUÊ/COMO** (o negócio descreve a intenção; o coding agent decide a implementação).
+
+### Como posicionar como IP reutilizável
+
+Esta demo deve ser apresentada como um padrão reutilizável, não como uma automação pontual de um repo:
+
+```text
+Pedido de negócio
+    -> agente orquestrador
+    -> modelo governado por APIM
+    -> tool OpenAPI de delegação
+    -> work item / issue
+    -> coding agent
+    -> PR + CI/CD
+    -> trace end-to-end em App Insights
+```
+
+Para adaptar a outro cliente ou equipa MALT, trocar principalmente: agente Foundry, target repo, App Insights,
+APIM, tool schema e política de criação de work items. O contrato completo de reutilização está em
+[REUSE-GUIDE.md](REUSE-GUIDE.md).
 
 ---
 
@@ -216,8 +245,29 @@ CI/CD: workflow `Deploy to Azure Container App` corrido com sucesso (OIDC → bu
 | **F3** | Container App `/agent` (delegação GitHub) | ✅ Completo + validado em produção (issue→PR) |
 | **F4** | Agente Foundry + OpenAPI tool + **LLM via APIM** | ✅ Completo + validado live (429 governance) |
 | **F5** | **Site live + CI/CD** (repo = Container App, muda a cada merge) | ✅ Completo + validado (OIDC→build→deploy) |
-| **F6** | Copilot Studio / M365 Copilot publish | 🟡 Em curso (ver secção 7) |
-| **F7** | Agent365 (mock) + Runbook da demo | ⬜ Pendente |
+| **F6** | Observabilidade end-to-end App Insights | ✅ Completo + validado (`operation_Id=5d210e1ff1014856861d30ae9ad05c77`) |
+| **F7** | Runbook da demo / LinkedIn | ✅ Completo ([APRESENTACAO-LINKEDIN.md](APRESENTACAO-LINKEDIN.md)) |
+| **F8** | Copilot Studio / M365 Copilot publish | 🟡 Opcional / próximo passo |
+
+### Observabilidade validada
+
+Na run validada, o prompt `Adiciona um voucher de 10% no checkout do contoso-cart.` criou a issue
+`https://github.com/eduxfernandes05/contoso-cart/issues/41` e produziu uma transação única no
+Application Insights:
+
+```text
+operation_Id=5d210e1ff1014856861d30ae9ad05c77
+```
+
+Essa transação contém:
+
+- APIM: chamadas ao `gpt-4.1-mini`.
+- `copilot-sdk-service`: `POST /agent`, `contoso.orchestrator`, `copilot.cloud_agent.task`.
+- GitHub Copilot cloud agent: `invoke_agent`, `chat claude-sonnet-4.6`, `execute_tool view/edit/bash`, `permission`.
+
+Nuance honesta para Q&A: o hosted Foundry runtime está ligado ao mesmo App Insights, mas ainda não apareceu
+como span raiz explícito `azure.ai.agent` nas queries. A cadeia operacional APIM → tool `/agent` → cloud agent
+está correlacionada e demonstrável.
 
 ### Decisão de tuning da demo (TPM)
 - **TPM baixo** (ex.: 200) → força o **`429`** para mostrar governance ao vivo (o "money-shot").

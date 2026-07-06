@@ -1,0 +1,107 @@
+// =====================================================================
+// Observabilidade de Governança — Demo E2E Agentic (APIM no meio)
+// App Insights: insights-zj44ehcf4zlxq  (o do APIM — onde vivem os tokens)
+// Como usar: Portal -> App Insights insights-zj44ehcf4zlxq -> Logs ->
+//            colar uma query -> Run. Ajusta o time range em cima.
+// =====================================================================
+
+
+// ---------------------------------------------------------------------
+// 1) TOTAL DE TOKENS POR CONSUMIDOR  (o número-chave da governança)
+//    Quem gastou quanto. Dimensão "Consumer" = subscription do APIM.
+// ---------------------------------------------------------------------
+customMetrics
+| where timestamp > ago(30d)
+| where name == "Total Tokens"
+| extend Consumer = tostring(customDimensions["Consumer"])
+| summarize TotalTokens = sum(value) by Consumer
+| order by TotalTokens desc
+
+
+// ---------------------------------------------------------------------
+// 2) DECOMPOSIÇÃO PROMPT vs COMPLETION POR CONSUMIDOR
+// ---------------------------------------------------------------------
+customMetrics
+| where timestamp > ago(30d)
+| where name in ("Prompt Tokens", "Completion Tokens", "Total Tokens")
+| extend Consumer = tostring(customDimensions["Consumer"])
+| summarize Tokens = sum(value) by Consumer, name
+| evaluate pivot(name, sum(Tokens))
+| order by ['Total Tokens'] desc
+
+
+// ---------------------------------------------------------------------
+// 3) TENDÊNCIA DE CONSUMO DE TOKENS NO TEMPO (gráfico de linha)
+// ---------------------------------------------------------------------
+customMetrics
+| where timestamp > ago(7d)
+| where name == "Total Tokens"
+| extend Consumer = tostring(customDimensions["Consumer"])
+| summarize Tokens = sum(value) by bin(timestamp, 1h), Consumer
+| render timechart
+
+
+// ---------------------------------------------------------------------
+// 4) TOKENS POR MODELO  (que modelo está a ser usado e quanto custa)
+// ---------------------------------------------------------------------
+customMetrics
+| where timestamp > ago(30d)
+| where name == "Total Tokens"
+| extend Model = tostring(customDimensions["Model"])
+| summarize TotalTokens = sum(value) by Model
+| order by TotalTokens desc
+
+
+// ---------------------------------------------------------------------
+// 5) TAXA DE 429 (rate limit / TPM excedido) — prova da governança a atuar
+//    429 = tokens-per-minute excedido ; 403 = quota excedida
+// ---------------------------------------------------------------------
+requests
+| where timestamp > ago(7d)
+| summarize Total = count() by resultCode
+| extend Resultado = case(
+    resultCode == "429", "429 — rate limit (TPM excedido)",
+    resultCode == "403", "403 — quota excedida",
+    resultCode startswith "2", "2xx — OK",
+    strcat(resultCode, " — outro"))
+| order by Total desc
+
+
+// ---------------------------------------------------------------------
+// 6) LATÊNCIA DO APIM (p50/p95/p99) — experiência do consumidor
+// ---------------------------------------------------------------------
+requests
+| where timestamp > ago(7d)
+| summarize
+    p50 = percentile(duration, 50),
+    p95 = percentile(duration, 95),
+    p99 = percentile(duration, 99),
+    Chamadas = count()
+    by bin(timestamp, 1h)
+| render timechart
+
+
+// ---------------------------------------------------------------------
+// 7) CUSTO ESTIMADO POR CONSUMIDOR  (ajusta os preços ao teu modelo)
+//    Exemplo gpt-4.1-mini: input ~$0.40 / 1M ; output ~$1.60 / 1M
+// ---------------------------------------------------------------------
+let precoPrompt = 0.40 / 1000000.0;       // $/token de input
+let precoCompletion = 1.60 / 1000000.0;   // $/token de output
+customMetrics
+| where timestamp > ago(30d)
+| where name in ("Prompt Tokens", "Completion Tokens")
+| extend Consumer = tostring(customDimensions["Consumer"])
+| summarize Tokens = sum(value) by Consumer, name
+| evaluate pivot(name, sum(Tokens))
+| extend CustoUSD = round(['Prompt Tokens'] * precoPrompt + ['Completion Tokens'] * precoCompletion, 4)
+| project Consumer, ['Prompt Tokens'], ['Completion Tokens'], CustoUSD
+| order by CustoUSD desc
+
+
+// ---------------------------------------------------------------------
+// 8) SANITY CHECK — há telemetria? (contagem por tipo nos últimos 30d)
+// ---------------------------------------------------------------------
+union requests, dependencies, customMetrics, traces
+| where timestamp > ago(30d)
+| summarize Registos = count() by itemType
+| order by Registos desc
