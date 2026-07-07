@@ -10,9 +10,10 @@ permissions:
   contents: read
 
 env:
-  ACR: acredudemocsd4bq4xx
-  RESOURCE_GROUP: rg-agent-demo
-  CONTAINER_APP: ca-contoso-cart
+  # Set these as GitHub repository variables (Settings -> Secrets and variables -> Actions -> Variables).
+  ACR: ${{ vars.AZURE_CONTAINER_REGISTRY }}
+  RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+  CONTAINER_APP: ${{ vars.AZURE_CONTAINER_APP }}
   IMAGE: contoso-cart
 
 jobs:

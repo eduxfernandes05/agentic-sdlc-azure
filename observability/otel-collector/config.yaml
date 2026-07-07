@@ -30,7 +30,7 @@ processors:
           - set(parent_span_id.string, resource.attributes["corr.span_id"]) where resource.attributes["corr.span_id"] != nil and parent_span_id.string == ""
 
 exporters:
-  # Ponte para o Application Insights (insights-zj44ehcf4zlxq) via connection string.
+  # Ponte para o Application Insights (<your-app-insights>) via connection string.
   azuremonitor:
     connection_string: "${env:APPLICATIONINSIGHTS_CONNECTION_STRING}"
   debug:

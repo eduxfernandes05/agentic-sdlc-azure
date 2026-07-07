@@ -13,7 +13,7 @@ flowchart TB
     User["Business user / Foundry Playground"]
 
     subgraph Foundry["Azure AI Foundry"]
-        Agent["Hosted agent<br/>contoso-orchestrator-agent"]
+        Agent["Hosted agent<br/>orchestrator-agent"]
         Tool["OpenAPI tool<br/>delegateToCopilot"]
     end
 

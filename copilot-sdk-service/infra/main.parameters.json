@@ -7,6 +7,7 @@
     "githubRepo": { "value": "${GITHUB_REPO}" },
     "useAzureModel": { "value": "${USE_AZURE_MODEL=false}" },
     "azureModelName": { "value": "${AZURE_MODEL_NAME=o4-mini}" },
-    "azureModelVersion": { "value": "${AZURE_MODEL_VERSION=2025-04-16}" }
+    "azureModelVersion": { "value": "${AZURE_MODEL_VERSION=2025-04-16}" },
+    "observabilityInsightsName": { "value": "${OBSERVABILITY_INSIGHTS_NAME}" }
   }
 }

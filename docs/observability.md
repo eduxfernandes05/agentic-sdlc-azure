@@ -4,27 +4,25 @@ Every step of the loop lands in a single Application Insights transaction, so yo
 
 ---
 
-## Validated Trace
+## Trace of One Run
+
+After a delegation, open Application Insights and search `Transaction search` for the run's `operation_Id`.
+
+Example prompt:
 
 ```text
-operation_Id = 5d210e1ff1014856861d30ae9ad05c77
-```
-
-Prompt used:
-
-```text
-Adiciona um voucher de 10% no checkout do contoso-cart.
+Add a 10% voucher at the contoso-cart checkout.
 ```
 
 The transaction contains:
 
-- `apim-zj44ehcf4zlxq Sweden Central`
+- `<your-apim> <region>`
 - `copilot-sdk-service`
 - `github.copilot.coding_agent`
 - `contoso.orchestrator`
 - `copilot.cloud_agent.task`
 - `invoke_agent`
-- `chat claude-sonnet-4.6`
+- `chat <model>`
 - `execute_tool view/edit/bash`
 - `permission`
 
@@ -48,7 +46,7 @@ The collector applies `transform/correlate` before exporting, which re-parents t
 
 1. Azure Portal → Application Insights.
 2. Open `Transaction search`.
-3. Search for the `operation_Id`.
+3. Search for the run's `operation_Id`.
 4. Open an item and choose `End-to-end transaction details`.
 5. Confirm the roles `apim...`, `copilot-sdk-service`, and `github.copilot.coding_agent`.
 
@@ -60,7 +58,7 @@ Requests in the trace:
 
 ```kusto
 requests
-| where operation_Id == "5d210e1ff1014856861d30ae9ad05c77"
+| where operation_Id == "<operation-id>"
 | project timestamp, cloud_RoleName, name, url, operation_ParentId, id, success, resultCode
 | order by timestamp asc
 ```
@@ -69,7 +67,7 @@ Dependencies with GenAI attributes:
 
 ```kusto
 dependencies
-| where operation_Id == "5d210e1ff1014856861d30ae9ad05c77"
+| where operation_Id == "<operation-id>"
 | project timestamp, cloud_RoleName, name, target, type, operation_ParentId, id, success, resultCode,
           genai=tostring(customDimensions["gen_ai.system"]),
           agent=tostring(customDimensions["gen_ai.agent.name"]),
@@ -81,7 +79,7 @@ Summary by role and name:
 
 ```kusto
 dependencies
-| where operation_Id == "5d210e1ff1014856861d30ae9ad05c77"
+| where operation_Id == "<operation-id>"
 | summarize count(), min(timestamp), max(timestamp) by cloud_RoleName, name
 | order by min_timestamp asc
 ```

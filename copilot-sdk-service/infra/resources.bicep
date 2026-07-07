@@ -44,7 +44,7 @@ param azureModelName string = 'o4-mini'
 param azureModelVersion string = '2025-04-16'
 
 @description('Existing Foundry/APIM Application Insights to consolidate agent traces into.')
-param observabilityInsightsName string = 'insights-zj44ehcf4zlxq'
+param observabilityInsightsName string = ''
 
 resource foundryInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: observabilityInsightsName

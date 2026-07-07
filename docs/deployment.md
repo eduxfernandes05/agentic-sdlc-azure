@@ -2,24 +2,24 @@
 
 This guide covers the Azure and GitHub resources needed to run the full loop, and how to configure each part.
 
-The resource names below are from the reference deployment. Replace them with your own when adapting the demo.
+You provide your own resources. The names below are examples — replace them with your own.
 
 ---
 
 ## Resources
 
-| Resource | Reference value | Purpose |
+| Resource | Example name | Purpose |
 |---|---|---|
-| Resource group | `rg-agent-demo` | Holds the demo resources |
-| Application Insights | `insights-zj44ehcf4zlxq` | Single telemetry target for the whole chain |
-| Foundry account | `agents-foundry-zj44ehcf4zlxq` | Hosts the agent and model access |
-| Foundry project | `foundry-project-agents-foundry` | Project with App Insights + APIM connections |
-| Foundry agent | `contoso-orchestrator-agent` | The orchestrator agent |
-| API Management | `apim-zj44ehcf4zlxq` | GenAI gateway in the model path |
-| API Container App | `ca-api-edudemo-csdk-4bq4xx` | Runs `copilot-sdk-service` (`/agent`) |
-| Collector Container App | `ca-otel-collector` | OpenTelemetry Collector |
-| Site Container App | `ca-contoso-cart` | The live demo site |
-| GitHub repo | `eduxfernandes05/contoso-cart` | Target repo and this app |
+| Resource group | `rg-agentic-sdlc` | Holds the demo resources |
+| Application Insights | `<your-app-insights>` | Single telemetry target for the whole chain |
+| Foundry account | `<your-foundry-account>` | Hosts the agent and model access |
+| Foundry project | `<your-foundry-project>` | Project with App Insights + APIM connections |
+| Foundry agent | `orchestrator-agent` | The orchestrator agent |
+| API Management | `<your-apim>` | GenAI gateway in the model path |
+| API Container App | `<your-api-app>` | Runs `copilot-sdk-service` (`/agent`) |
+| Collector Container App | `<your-collector-app>` | OpenTelemetry Collector |
+| Site Container App | `<your-site-app>` | The live demo site |
+| GitHub repo | `<owner>/contoso-cart` | Target repo and this app |
 
 ---
 
@@ -41,6 +41,8 @@ The API exposes `POST /agent`, which creates a GitHub issue, assigns the Copilot
 ```bash
 cd copilot-sdk-service
 azd auth login
+azd env set GITHUB_REPO <owner>/contoso-cart
+azd env set OBSERVABILITY_INSIGHTS_NAME <your-app-insights>
 azd up
 ```
 
@@ -90,7 +92,7 @@ These are **GitHub Copilot Agents variables**, not GitHub Actions environment va
 | Variable | Value |
 |---|---|
 | `COPILOT_OTEL_ENABLED` | `true` |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | `https://ca-otel-collector.<domain>` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `https://<your-collector-app>.<domain>` |
 | `OTEL_EXPORTER_OTLP_PROTOCOL` | `http/protobuf` |
 | `OTEL_SERVICE_NAME` | `github.copilot.coding_agent` |
 | `COPILOT_OTEL_CAPTURE_CONTENT` | `true` |
@@ -105,13 +107,18 @@ Also allowlist the collector FQDN in the cloud-agent firewall so it can export t
 
 The `contoso-cart` app deploys to Azure Container Apps through [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) on every push to `main`. The workflow uses OIDC (no stored passwords) to build the image and update the Container App.
 
-Required GitHub secrets for the workflow:
+Required GitHub configuration for the workflow:
 
-| Secret | Purpose |
-|---|---|
-| `AZURE_CLIENT_ID` | Federated identity for OIDC login |
-| `AZURE_TENANT_ID` | Azure tenant |
-| `AZURE_SUBSCRIPTION_ID` | Target subscription |
+| Type | Name | Purpose |
+|---|---|---|
+| Secret | `AZURE_CLIENT_ID` | Federated identity for OIDC login |
+| Secret | `AZURE_TENANT_ID` | Azure tenant |
+| Secret | `AZURE_SUBSCRIPTION_ID` | Target subscription |
+| Variable | `AZURE_CONTAINER_REGISTRY` | ACR that builds and stores the image |
+| Variable | `AZURE_RESOURCE_GROUP` | Resource group of the site Container App |
+| Variable | `AZURE_CONTAINER_APP` | Site Container App name |
+
+Set variables under **Settings → Secrets and variables → Actions → Variables**, and secrets under **Secrets**.
 
 ---
 

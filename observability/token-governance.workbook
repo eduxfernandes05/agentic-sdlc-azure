@@ -4,7 +4,7 @@
     {
       "type": 1,
       "content": {
-        "json": "# 🛡️ Governança de Tokens — Demo E2E Agentic (APIM no meio)\n\nTelemetria emitida pelo **API Management** (`apim-zj44ehcf4zlxq`) via policy `azure-openai-emit-token-metric`.\nCada chamada do agente ao modelo passa pelo APIM e fica registada aqui, **por consumidor**.\n\n> Fonte: App Insights `insights-zj44ehcf4zlxq` · Métricas: Total/Prompt/Completion Tokens · Dimensões: Consumer, Model, Region."
+        "json": "# 🛡️ Governança de Tokens — Agentic SDLC (APIM no meio)\n\nTelemetria emitida pelo **API Management** (`<your-apim>`) via policy `azure-openai-emit-token-metric`.\nCada chamada do agente ao modelo passa pelo APIM e fica registada aqui, **por consumidor**.\n\n> Fonte: App Insights `<your-app-insights>` · Métricas: Total/Prompt/Completion Tokens · Dimensões: Consumer, Model, Region."
       },
       "name": "titulo"
     },

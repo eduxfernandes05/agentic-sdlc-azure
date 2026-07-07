@@ -6,7 +6,7 @@
     "version": "1.0.0"
   },
   "servers": [
-    { "url": "https://ca-api-edudemo-csdk-4bq4xx.gentlepond-a81d8e3c.swedencentral.azurecontainerapps.io" }
+    { "url": "https://<your-api-container-app>.<region>.azurecontainerapps.io" }
   ],
   "paths": {
     "/agent": {

@@ -88,7 +88,7 @@ router.post("/agent", async (req, res) => {
     const { owner, name } = repoFromEnv();
     const result = await withAgentSpan(
       "contoso.orchestrator",
-      { "gen_ai.agent.name": "contoso-orchestrator-agent", "gen_ai.request.model": process.env.MODEL_NAME ?? "default" },
+      { "gen_ai.agent.name": process.env.AGENT_NAME ?? "orchestrator-agent", "gen_ai.request.model": process.env.MODEL_NAME ?? "default" },
       async (span) => {
         span.setAttribute("gen_ai.input.messages", issueTitle);
     // 1. Resolve the repository node id and the Copilot coding agent actor id.

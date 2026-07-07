@@ -4,8 +4,6 @@
 
 A hosted Azure AI Foundry agent reasons through an APIM-governed model, delegates the implementation to the GitHub Copilot cloud agent, and the change ships to Azure Container Apps. Every step lands in a single Application Insights trace.
 
-[![live site](https://img.shields.io/badge/live-contoso--cart-107c10)](https://ca-contoso-cart.gentlepond-a81d8e3c.swedencentral.azurecontainerapps.io/)
-
 ---
 
 ```mermaid
@@ -53,11 +51,7 @@ The `contoso-cart` site deploys to Azure Container Apps on every push to `main` 
 
 ## Observability Proof
 
-Open Application Insights and search `Transaction search` for:
-
-```text
-5d210e1ff1014856861d30ae9ad05c77
-```
+After a delegation, open Application Insights and search `Transaction search` for your run's `operation_Id`.
 
 The transaction spans APIM, `POST /agent`, `contoso.orchestrator`, `copilot.cloud_agent.task`, and the GitHub Copilot cloud-agent tree (`invoke_agent`, `chat`, `execute_tool`, `permission`). Details and KQL in [docs/observability.md](docs/observability.md).
 

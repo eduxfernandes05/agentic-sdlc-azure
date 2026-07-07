@@ -9,7 +9,7 @@ param environmentName string
 param location string
 
 @description('Existing resource group to deploy into.')
-param resourceGroupName string = 'rg-agent-demo'
+param resourceGroupName string = ''
 
 @secure()
 @description('GitHub token for Copilot SDK')
@@ -39,6 +39,9 @@ param azureModelName string = 'o4-mini'
 @description('Azure OpenAI model version (must match the model name; see `az cognitiveservices model list`)')
 param azureModelVersion string = '2025-04-16'
 
+@description('Existing Application Insights (from your Foundry/APIM setup) to consolidate agent traces into.')
+param observabilityInsightsName string = ''
+
 var tags = { 'azd-env-name': environmentName }
 var resourceSuffix = take(uniqueString(subscription().id, environmentName), 6)
 var shortName = take(replace(environmentName, '-', ''), 10)
@@ -61,6 +64,7 @@ module resources './resources.bicep' = {
     useAzureModel: useAzureModel
     azureModelName: azureModelName
     azureModelVersion: azureModelVersion
+    observabilityInsightsName: observabilityInsightsName
   }
 }
 

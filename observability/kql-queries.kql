@@ -1,7 +1,7 @@
 // =====================================================================
-// Observabilidade de Governança — Demo E2E Agentic (APIM no meio)
-// App Insights: insights-zj44ehcf4zlxq  (o do APIM — onde vivem os tokens)
-// Como usar: Portal -> App Insights insights-zj44ehcf4zlxq -> Logs ->
+// Observabilidade de Governanca - Agentic SDLC (APIM no meio)
+// App Insights: <your-app-insights>  (o do APIM - onde vivem os tokens)
+// Como usar: Portal -> App Insights <your-app-insights> -> Logs ->
 //            colar uma query -> Run. Ajusta o time range em cima.
 // =====================================================================
 
