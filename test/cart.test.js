@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cartTotal, applyDiscount, applyVoucher, freeShipping, giftWrapFee, validateVoucherCode, clearCart } from "../src/cart.js";
+import { cartTotal, applyDiscount, applyVoucher, freeShipping, giftWrapFee, validateVoucherCode, clearCart, orderSummary } from "../src/cart.js";
 
 test("cartTotal sums price * quantity", () => {
   const items = [
@@ -146,4 +146,28 @@ test("index.html clear-cart handler calls DELETE /api/cart on confirmation", () 
   const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('method: "DELETE"'));
   assert.ok(html.includes('"/api/cart"'));
+});
+
+test("orderSummary: no-discount case has discount=0 and total equals subtotal", () => {
+  const items = [
+    { name: "Coffee", price: 3, quantity: 2 },
+    { name: "Mug", price: 10, quantity: 1 },
+  ];
+  const summary = orderSummary(items);
+  assert.equal(summary.subtotal, 16);
+  assert.equal(summary.discount, 0);
+  assert.equal(summary.total, 16);
+  assert.equal(summary.subtotal - summary.discount, summary.total);
+});
+
+test("orderSummary: subtotal minus discount equals total when voucher applied", () => {
+  const items = [
+    { name: "Coffee", price: 3, quantity: 2 },
+    { name: "Mug", price: 10, quantity: 1 },
+  ];
+  const summary = orderSummary(items, "SAVE10");
+  assert.equal(summary.subtotal, 16);
+  assert.equal(summary.discount, 1.6);
+  assert.equal(summary.total, 14.4);
+  assert.equal(summary.subtotal - summary.discount, summary.total);
 });
