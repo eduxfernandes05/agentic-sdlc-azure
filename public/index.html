@@ -66,6 +66,11 @@
     footer { text-align: center; padding: 24px 16px; font-size: 13px; color: var(--qty); }
     footer a { color: var(--brand); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
+    #empty-cart { display: none; text-align: center; padding: 40px 20px; }
+    #empty-cart p { color: var(--qty); margin: 0 0 16px; font-size: 16px; }
+    #empty-cart a { display: inline-block; padding: 12px 24px; background: var(--brand); color: #fff;
+      border-radius: 10px; text-decoration: none; font-weight: 600; }
+    #empty-cart a:hover { opacity: 0.85; }
     @media (max-width: 560px) {
       .header-top { flex-wrap: wrap; }
       .placeholder-section { min-width: 100%; }
@@ -101,6 +106,10 @@
   <main role="main">
     <div class="card">
       <div id="items"></div>
+      <div id="empty-cart" style="display:none">
+        <p>Your cart is empty.</p>
+        <a href="/menu/products">Continue shopping</a>
+      </div>
       <div id="voucher-section">
         <input id="voucher-input" type="text" placeholder="Voucher code (e.g. SAVE10)" />
         <button id="voucher-btn">Apply</button>
@@ -128,12 +137,20 @@
 
     fetch("/api/cart").then((r) => r.json()).then((data) => {
       subtotalValue = data.subtotal;
-      document.getElementById("items").innerHTML = data.items.map((i) =>
-        `<div class="row"><img class="product-img" src="${i.image}" alt="${i.name}">`
-        + `<span class="name">${i.name} <span class="qty">×${i.quantity}</span></span>`
-        + `<span>${money(i.price * i.quantity)}</span></div>`).join("");
-      document.getElementById("subtotal").textContent = money(data.subtotal);
-      document.getElementById("total").textContent = money(data.subtotal);
+      const isEmpty = data.items.length === 0;
+      document.getElementById("empty-cart").style.display = isEmpty ? "" : "none";
+      document.getElementById("voucher-section").style.display = isEmpty ? "none" : "";
+      document.querySelector(".totals").style.display = isEmpty ? "none" : "";
+      document.getElementById("checkout").style.display = isEmpty ? "none" : "";
+      document.getElementById("clear-cart").style.display = isEmpty ? "none" : "";
+      if (!isEmpty) {
+        document.getElementById("items").innerHTML = data.items.map((i) =>
+          `<div class="row"><img class="product-img" src="${i.image}" alt="${i.name}">`
+          + `<span class="name">${i.name} <span class="qty">×${i.quantity}</span></span>`
+          + `<span>${money(i.price * i.quantity)}</span></div>`).join("");
+        document.getElementById("subtotal").textContent = money(data.subtotal);
+        document.getElementById("total").textContent = money(data.subtotal);
+      }
     });
 
     document.getElementById("voucher-btn").addEventListener("click", () => {
@@ -166,8 +183,11 @@
       fetch("/api/cart", { method: "DELETE" }).then((r) => r.json()).then(() => {
         document.getElementById("items").innerHTML = "";
         subtotalValue = 0;
-        document.getElementById("subtotal").textContent = money(0);
-        document.getElementById("total").textContent = money(0);
+        document.getElementById("empty-cart").style.display = "";
+        document.getElementById("voucher-section").style.display = "none";
+        document.querySelector(".totals").style.display = "none";
+        document.getElementById("checkout").style.display = "none";
+        document.getElementById("clear-cart").style.display = "none";
         document.getElementById("discount-row").style.display = "none";
         document.getElementById("voucher-input").value = "";
         const msg = document.getElementById("voucher-msg");
