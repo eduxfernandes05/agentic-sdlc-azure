@@ -43,15 +43,10 @@ test("applyVoucher trims whitespace from code", () => {
   assert.equal(result.valid, true);
 });
 
-test("discount codes are loaded from configuration file", () => {
-  const config = JSON.parse(readFileSync(new URL("../src/discount-codes.json", import.meta.url), "utf8"));
-  assert.equal(config.SAVE10, 0.1);
-  assert.equal(config.CONTOSO10, 0.1);
-  assert.equal(config.SAVE50, 0.5);
-});
-
 test("VALID_VOUCHERS includes configured discount codes", () => {
   assert.equal(VALID_VOUCHERS.get("SAVE10"), 0.1);
+  assert.equal(VALID_VOUCHERS.get("CONTOSO10"), 0.1);
+  assert.equal(VALID_VOUCHERS.get("SAVE50"), 0.5);
 });
 
 test("applyVoucher returns valid=false and zero discount for unknown code", () => {
