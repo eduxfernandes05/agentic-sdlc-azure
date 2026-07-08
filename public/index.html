@@ -115,7 +115,7 @@
       </div>
     </div>
     <button id="checkout" aria-label="Add to cart">Checkout</button>
-    <button id="clear-cart" aria-label="Clear cart">🗑️ Clear cart</button>
+    <button id="clear-cart">🗑️ Clear cart</button>
   </main>
   <button id="settings-btn" aria-label="Settings">⚙️</button>
   <div id="settings-panel" role="dialog" aria-label="Settings panel">
@@ -173,6 +173,8 @@
         const msg = document.getElementById("voucher-msg");
         msg.textContent = "";
         msg.className = "";
+      }).catch(() => {
+        alert("Failed to clear cart. Please try again.");
       });
     });
 
