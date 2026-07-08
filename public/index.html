@@ -49,6 +49,9 @@
     #voucher-msg.err { color: #c0392b; }
     #checkout { width: 100%; margin-top: 16px; padding: 14px; border: none; border-radius: 10px;
       background: var(--brand); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
+    #clear-cart { width: 100%; margin-top: 8px; padding: 14px; border: 1px solid #c0392b; border-radius: 10px;
+      background: transparent; color: #c0392b; font-size: 16px; font-weight: 600; cursor: pointer; }
+    #clear-cart:hover { background: #c0392b; color: #fff; }
     #settings-btn { position: fixed; bottom: 24px; right: 24px; width: 48px; height: 48px;
       border-radius: 50%; border: none; background: var(--brand); color: #fff;
       font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
@@ -112,6 +115,7 @@
       </div>
     </div>
     <button id="checkout" aria-label="Add to cart">Checkout</button>
+    <button id="clear-cart" aria-label="Clear cart">🗑️ Clear cart</button>
   </main>
   <button id="settings-btn" aria-label="Settings">⚙️</button>
   <div id="settings-panel" role="dialog" aria-label="Settings panel">
@@ -156,6 +160,21 @@
     });
 
     document.getElementById("checkout").addEventListener("click", () => alert("Order placed!"));
+
+    document.getElementById("clear-cart").addEventListener("click", () => {
+      if (!confirm("Are you sure you want to clear the cart?")) return;
+      fetch("/api/cart", { method: "DELETE" }).then((r) => r.json()).then(() => {
+        document.getElementById("items").innerHTML = "";
+        subtotalValue = 0;
+        document.getElementById("subtotal").textContent = money(0);
+        document.getElementById("total").textContent = money(0);
+        document.getElementById("discount-row").style.display = "none";
+        document.getElementById("voucher-input").value = "";
+        const msg = document.getElementById("voucher-msg");
+        msg.textContent = "";
+        msg.className = "";
+      });
+    });
 
     const toggle = document.getElementById("theme-toggle");
     function applyTheme(dark) {

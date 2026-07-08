@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cartTotal, applyDiscount, applyVoucher, freeShipping, giftWrapFee, validateVoucherCode } from "../src/cart.js";
+import { cartTotal, applyDiscount, applyVoucher, freeShipping, giftWrapFee, validateVoucherCode, clearCart } from "../src/cart.js";
 
 test("cartTotal sums price * quantity", () => {
   const items = [
@@ -94,4 +94,35 @@ test("index.html renders product images with descriptive alt text", () => {
 test("index main container has role main", () => {
   const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
   assert.match(html, /<main\b[^>]*\brole=["']main["'][^>]*>/);
+});
+
+test("clearCart empties the items array", () => {
+  const items = [
+    { name: "Coffee", price: 3, quantity: 2 },
+    { name: "Mug", price: 10, quantity: 1 },
+  ];
+  clearCart(items);
+  assert.equal(items.length, 0);
+});
+
+test("clearCart on an already-empty array is safe", () => {
+  const items = [];
+  clearCart(items);
+  assert.equal(items.length, 0);
+});
+
+test("index.html has a clear-cart button", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('id="clear-cart"'));
+});
+
+test("index.html clear-cart handler shows a confirm dialog before clearing", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes("confirm("));
+});
+
+test("index.html clear-cart handler calls DELETE /api/cart on confirmation", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('method: "DELETE"'));
+  assert.ok(html.includes('"/api/cart"'));
 });

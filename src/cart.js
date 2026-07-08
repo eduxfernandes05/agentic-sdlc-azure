@@ -34,6 +34,13 @@ export function applyDiscount(total, code) {
 }
 
 /**
+ * Remove all items from the cart array in-place.
+ */
+export function clearCart(items) {
+  items.splice(0, items.length);
+}
+
+/**
  * Apply a voucher code to a subtotal.
  * Returns { valid, discount, total }.
  *   valid    – true when the code is recognised
