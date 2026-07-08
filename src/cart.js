@@ -15,7 +15,12 @@ const GIFT_WRAP_PRICE_PER_ITEM = 3.5;
 
 function loadVoucherRates() {
   const configPath = join(dirname(fileURLToPath(import.meta.url)), "discount-codes.json");
-  const config = JSON.parse(readFileSync(configPath, "utf8"));
+  let config;
+  try {
+    config = JSON.parse(readFileSync(configPath, "utf8"));
+  } catch (error) {
+    throw new Error("Failed to load discount codes configuration", { cause: error });
+  }
   return new Map(
     Object.entries(config)
       .filter(([code, rate]) => typeof code === "string" && Number.isFinite(rate) && rate > 0 && rate < 1)

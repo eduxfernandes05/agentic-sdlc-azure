@@ -46,6 +46,8 @@ test("applyVoucher trims whitespace from code", () => {
 test("discount codes are loaded from configuration file", () => {
   const config = JSON.parse(readFileSync(new URL("../src/discount-codes.json", import.meta.url), "utf8"));
   assert.equal(config.SAVE10, 0.1);
+  assert.equal(config.CONTOSO10, 0.1);
+  assert.equal(config.SAVE50, 0.5);
 });
 
 test("VALID_VOUCHERS includes configured discount codes", () => {
