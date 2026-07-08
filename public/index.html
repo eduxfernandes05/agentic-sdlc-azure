@@ -111,8 +111,8 @@
         <a href="/menu/products">Continue shopping</a>
       </div>
       <div id="voucher-section">
-        <input id="voucher-input" type="text" placeholder="Voucher code (e.g. SAVE10)" />
-        <button id="voucher-btn">Apply</button>
+        <input id="voucher-input" type="text" placeholder="Discount code (e.g. SAVE10)" />
+        <button id="voucher-btn">Apply code</button>
       </div>
       <div id="voucher-msg"></div>
       <div class="totals">
@@ -166,12 +166,12 @@
           document.getElementById("discount-label").textContent = "Discount (" + Math.round(data.rate * 100) + "%)";
           document.getElementById("discount").textContent = "-" + money(data.discount);
           document.getElementById("total").textContent = money(data.total);
-          msg.textContent = "✅ Voucher applied.";
+          msg.textContent = "✅ Discount code applied. You saved " + money(data.discount) + ".";
           msg.className = "ok";
         } else {
           document.getElementById("discount-row").style.display = "none";
           document.getElementById("total").textContent = money(subtotalValue);
-          msg.textContent = "❌ Invalid voucher code.";
+          msg.textContent = "❌ Invalid discount code.";
           msg.className = "err";
         }
       });

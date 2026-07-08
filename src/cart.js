@@ -1,4 +1,7 @@
 // Contoso Cart — core pricing logic.
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 /**
  * Calculate the total price for a list of items.
@@ -10,12 +13,18 @@ export function cartTotal(items) {
 
 const GIFT_WRAP_PRICE_PER_ITEM = 3.5;
 
+function loadVoucherRates() {
+  const configPath = join(dirname(fileURLToPath(import.meta.url)), "discount-codes.json");
+  const config = JSON.parse(readFileSync(configPath, "utf8"));
+  return new Map(
+    Object.entries(config)
+      .filter(([code, rate]) => typeof code === "string" && Number.isFinite(rate) && rate > 0 && rate < 1)
+      .map(([code, rate]) => [code.trim().toUpperCase(), rate]),
+  );
+}
+
 /** Valid voucher codes mapped to their discount rate. */
-export const VALID_VOUCHERS = new Map([
-  ["SAVE10", 0.1],
-  ["CONTOSO10", 0.1],
-  ["SAVE50", 0.5],
-]);
+export const VALID_VOUCHERS = loadVoucherRates();
 
 export function freeShipping(subtotal) {
   return subtotal > 50;

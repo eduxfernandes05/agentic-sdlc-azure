@@ -43,6 +43,11 @@ test("applyVoucher trims whitespace from code", () => {
   assert.equal(result.valid, true);
 });
 
+test("discount codes are loaded from configuration file", () => {
+  const config = JSON.parse(readFileSync(new URL("../src/discount-codes.json", import.meta.url), "utf8"));
+  assert.equal(config.SAVE10, 0.1);
+});
+
 test("applyVoucher returns valid=false and zero discount for unknown code", () => {
   const result = applyVoucher(100, "INVALID");
   assert.equal(result.valid, false);
@@ -146,6 +151,16 @@ test("index.html clear-cart handler calls DELETE /api/cart on confirmation", () 
   const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('method: "DELETE"'));
   assert.ok(html.includes('"/api/cart"'));
+});
+
+test("index.html checkout includes a discount code input", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.match(html, /placeholder="Discount code \(e\.g\. SAVE10\)"/);
+});
+
+test("index.html shows a clear invalid discount code message", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes("Invalid discount code."));
 });
 
 test("orderSummary: no-discount case has discount=0 and total equals subtotal", () => {
