@@ -95,3 +95,24 @@ test("index main container has role main", () => {
   const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
   assert.match(html, /<main\b[^>]*\brole=["']main["'][^>]*>/);
 });
+
+test("index.html has an empty-cart state element", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.match(html, /id=["']empty-cart["']/);
+});
+
+test("empty-cart state is hidden by default", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.match(html, /id="empty-cart"[^>]*style="[^"]*display\s*:\s*none/);
+});
+
+test("empty-cart state contains a Continue shopping link", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.match(html, /Continue shopping/);
+});
+
+test("cart render toggles empty-cart visibility based on items length", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.match(html, /empty-cart/);
+  assert.match(html, /items\.length/);
+});
