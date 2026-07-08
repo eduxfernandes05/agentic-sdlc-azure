@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cartTotal, applyDiscount, applyVoucher, freeShipping, giftWrapFee, validateVoucherCode, clearCart, orderSummary } from "../src/cart.js";
+import { cartTotal, applyDiscount, applyVoucher, freeShipping, giftWrapFee, validateVoucherCode, clearCart, orderSummary, VALID_VOUCHERS } from "../src/cart.js";
 
 test("cartTotal sums price * quantity", () => {
   const items = [
@@ -46,6 +46,10 @@ test("applyVoucher trims whitespace from code", () => {
 test("discount codes are loaded from configuration file", () => {
   const config = JSON.parse(readFileSync(new URL("../src/discount-codes.json", import.meta.url), "utf8"));
   assert.equal(config.SAVE10, 0.1);
+});
+
+test("VALID_VOUCHERS includes configured discount codes", () => {
+  assert.equal(VALID_VOUCHERS.get("SAVE10"), 0.1);
 });
 
 test("applyVoucher returns valid=false and zero discount for unknown code", () => {
