@@ -42,14 +42,28 @@ export function clearCart(items) {
 
 /**
  * Apply a voucher code to a subtotal.
- * Returns { valid, discount, total }.
+ * Returns { valid, rate, discount, total }.
  *   valid    – true when the code is recognised
+ *   rate     – discount rate applied (0 when invalid)
  *   discount – amount deducted (0 when invalid)
- *   total    – subtotal minus discount (10% off when valid)
+ *   total    – subtotal minus discount
  */
 export function applyVoucher(subtotal, code) {
   const rate = VALID_VOUCHERS.get((code || "").trim().toUpperCase()) ?? 0;
   const valid = rate > 0;
   const discount = Math.round(subtotal * rate * 100) / 100;
-  return { valid, discount, total: subtotal - discount };
+  return { valid, rate, discount, total: subtotal - discount };
+}
+
+/**
+ * Compute the order summary breakdown for an item list and optional voucher code.
+ * Returns { subtotal, discount, total }.
+ *   subtotal – sum of all item prices × quantities
+ *   discount – amount deducted by voucher (0 when no valid voucher)
+ *   total    – subtotal minus discount (always equals subtotal - discount)
+ */
+export function orderSummary(items, code) {
+  const subtotal = cartTotal(items);
+  const { discount, total } = applyVoucher(subtotal, code);
+  return { subtotal, discount, total };
 }

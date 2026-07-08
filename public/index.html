@@ -118,7 +118,7 @@
       <div class="totals">
         <div class="row"><span>Subtotal</span><span id="subtotal">—</span></div>
         <div class="row discount-row" id="discount-row" style="display:none">
-          <span>Discount (10%)</span><span id="discount">—</span>
+          <span id="discount-label">Discount</span><span id="discount">—</span>
         </div>
         <div class="row grand"><span>Total</span><span id="total">—</span></div>
       </div>
@@ -163,6 +163,7 @@
       }).then((r) => r.json()).then((data) => {
         if (data.valid) {
           document.getElementById("discount-row").style.display = "";
+          document.getElementById("discount-label").textContent = "Discount (" + Math.round(data.rate * 100) + "%)";
           document.getElementById("discount").textContent = "-" + money(data.discount);
           document.getElementById("total").textContent = money(data.total);
           msg.textContent = "✅ Voucher applied.";
