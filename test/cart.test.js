@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { cartTotal, applyDiscount, applyVoucher, freeShipping, giftWrapFee, validateVoucherCode, clearCart, orderSummary } from "../src/cart.js";
+import { cartTotal, applyDiscount, applyVoucher, freeShipping, giftWrapFee, validateVoucherCode, clearCart, orderSummary, VALID_VOUCHERS } from "../src/cart.js";
 
 test("cartTotal sums price * quantity", () => {
   const items = [
@@ -41,6 +41,12 @@ test("applyVoucher is case-insensitive", () => {
 test("applyVoucher trims whitespace from code", () => {
   const result = applyVoucher(100, "  SAVE10  ");
   assert.equal(result.valid, true);
+});
+
+test("VALID_VOUCHERS includes configured discount codes", () => {
+  assert.equal(VALID_VOUCHERS.get("SAVE10"), 0.1);
+  assert.equal(VALID_VOUCHERS.get("CONTOSO10"), 0.1);
+  assert.equal(VALID_VOUCHERS.get("SAVE50"), 0.5);
 });
 
 test("applyVoucher returns valid=false and zero discount for unknown code", () => {
@@ -146,6 +152,16 @@ test("index.html clear-cart handler calls DELETE /api/cart on confirmation", () 
   const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('method: "DELETE"'));
   assert.ok(html.includes('"/api/cart"'));
+});
+
+test("index.html checkout includes a discount code input", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.match(html, /placeholder="Discount code \(e\.g\. SAVE10\)"/);
+});
+
+test("index.html shows a clear invalid discount code message", () => {
+  const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes("Invalid discount code."));
 });
 
 test("orderSummary: no-discount case has discount=0 and total equals subtotal", () => {
