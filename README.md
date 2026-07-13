@@ -62,27 +62,46 @@ A hosted **Azure AI Foundry** agent reasons through an **APIM-governed** model, 
 
 ## How it works
 
-<div align="center">
-
-<img src="docs/assets/architecture.png" alt="System overview: a business user calls the Azure AI Foundry agent, which reasons through a governed model plane (API Management in front of an OpenAI model) and delegates via an OpenAPI tool to the copilot-sdk-service delivery API on Azure Container Apps. The API opens a GitHub issue and assigns the GitHub Copilot cloud agent, which opens a pull request that GitHub Actions deploys to the contoso-cart site. API Management, the delivery API, the OpenTelemetry Collector and the cloud agent all export telemetry to Application Insights under one operation_Id." width="100%" />
-
-</div>
-
-<details>
-<summary>Same flow as a Mermaid diagram</summary>
-
 ```mermaid
-flowchart LR
-    U["Business prompt"] --> F["Azure AI Foundry<br/>agent"]
-    F --> A["APIM<br/>GenAI gateway"] --> M["OpenAI model"]
-    F --> T["OpenAPI tool"] --> API["copilot-sdk-service<br/>/agent"]
-    API --> I["GitHub issue"] --> C["Copilot cloud agent"] --> PR["Pull Request"] --> D["Deploy"]
-    A --> AI[("Application Insights")]
-    API --> AI
-    C --> OT["OTel Collector"] --> AI
-```
+flowchart TB
+    User["Business user / Foundry Playground"]
 
-</details>
+    subgraph Foundry["Azure AI Foundry"]
+        Agent["Hosted agent<br/>orchestrator-agent"]
+        Tool["OpenAPI tool<br/>delegateToCopilot"]
+    end
+
+    subgraph Gateway["Governed Model Plane"]
+        APIM["Azure API Management<br/>GenAI Gateway<br/>/inference/openai"]
+        Model["Azure OpenAI / Foundry model<br/>gpt-4.1-mini"]
+    end
+
+    subgraph Runtime["Azure Container Apps"]
+        API["copilot-sdk-service<br/>POST /agent"]
+        Collector["OpenTelemetry Collector<br/>OTLP HTTP 4318<br/>transform/correlate"]
+        Site["contoso-cart<br/>live demo site"]
+    end
+
+    subgraph GitHub["GitHub"]
+        Issue["Issue"]
+        Vars["Agents variables store"]
+        Cloud["GitHub Copilot cloud agent"]
+        PR["Pull Request"]
+        Actions["GitHub Actions deploy"]
+    end
+
+    AI[("Application Insights")]
+
+    User --> Agent
+    Agent --> APIM --> Model
+    Agent --> Tool --> API
+    API --> Issue --> Cloud --> PR --> Actions --> Site
+    API --> Vars --> Cloud
+
+    APIM -- "native AI diagnostic" --> AI
+    API -- "Azure Monitor OTel" --> AI
+    Cloud -- "OTLP http/protobuf" --> Collector --> AI
+```
 
 The Foundry agent owns the **intent** (*what* to build and why); the GitHub Copilot cloud agent owns the **implementation** (*which* files and functions change). Full system design, runtime sequence and span reference live in [docs/architecture.md](docs/architecture.md).
 
