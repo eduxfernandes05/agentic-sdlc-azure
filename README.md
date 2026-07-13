@@ -62,16 +62,27 @@ A hosted **Azure AI Foundry** agent reasons through an **APIM-governed** model, 
 
 ## How it works
 
+<div align="center">
+
+<img src="docs/assets/architecture.png" alt="System overview: a business user calls the Azure AI Foundry agent, which reasons through a governed model plane (API Management in front of an OpenAI model) and delegates via an OpenAPI tool to the copilot-sdk-service delivery API on Azure Container Apps. The API opens a GitHub issue and assigns the GitHub Copilot cloud agent, which opens a pull request that GitHub Actions deploys to the contoso-cart site. API Management, the delivery API, the OpenTelemetry Collector and the cloud agent all export telemetry to Application Insights under one operation_Id." width="100%" />
+
+</div>
+
+<details>
+<summary>Same flow as a Mermaid diagram</summary>
+
 ```mermaid
 flowchart LR
     U["Business prompt"] --> F["Azure AI Foundry<br/>agent"]
-    F --> A["APIM<br/>GenAI gateway"] --> M["Model"]
+    F --> A["APIM<br/>GenAI gateway"] --> M["OpenAI model"]
     F --> T["OpenAPI tool"] --> API["copilot-sdk-service<br/>/agent"]
     API --> I["GitHub issue"] --> C["Copilot cloud agent"] --> PR["Pull Request"] --> D["Deploy"]
     A --> AI[("Application Insights")]
     API --> AI
     C --> OT["OTel Collector"] --> AI
 ```
+
+</details>
 
 The Foundry agent owns the **intent** (*what* to build and why); the GitHub Copilot cloud agent owns the **implementation** (*which* files and functions change). Full system design, runtime sequence and span reference live in [docs/architecture.md](docs/architecture.md).
 
