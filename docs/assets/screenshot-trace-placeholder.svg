@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500" role="img" aria-label="Placeholder — replace with a screenshot of the Application Insights end-to-end trace.">
+  <defs><style>.t{font-family:'Segoe UI',system-ui,sans-serif;fill:#0f6cbd;}</style></defs>
+  <rect width="800" height="500" rx="14" fill="#e9f2fb"/>
+  <rect x="6" y="6" width="788" height="488" rx="10" fill="none" stroke="#a9ccec" stroke-width="2" stroke-dasharray="9 7"/>
+  <text x="400" y="240" text-anchor="middle" class="t" font-size="30" font-weight="800">Screenshot: end-to-end trace</text>
+  <text x="400" y="282" text-anchor="middle" class="t" font-size="18" font-weight="500">Replace docs/assets/screenshot-trace.png</text>
+</svg>
