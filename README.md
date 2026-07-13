@@ -10,8 +10,8 @@
 <p><strong>A natural-language request becomes a reviewed pull request and a live deployment — governed, and fully observable end to end.</strong></p>
 
 <p>
-  <a href="https://github.com/eduxfernandes05/contoso-cart/actions/workflows/deploy.yml">
-    <img src="https://github.com/eduxfernandes05/contoso-cart/actions/workflows/deploy.yml/badge.svg" alt="Deploy to Azure Container Apps" />
+  <a href="https://github.com/eduxfernandes05/agentic-sdlc-azure/actions/workflows/deploy.yml">
+    <img src="https://github.com/eduxfernandes05/agentic-sdlc-azure/actions/workflows/deploy.yml/badge.svg" alt="Deploy to Azure Container Apps" />
   </a>
   <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" />
   <img src="https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white" alt="Node.js 20+" />
