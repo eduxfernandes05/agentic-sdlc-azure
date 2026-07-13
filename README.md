@@ -3,7 +3,7 @@
 
 <div align="center">
 
-<img src="docs/assets/hero.svg" alt="Agentic SDLC on Azure — a natural-language request becomes a reviewed pull request and a live deployment, observed end to end." width="100%" />
+<img src="docs/assets/flow.png" alt="Business user to Azure AI Foundry to API Management to GitHub Copilot to Pull Request to Azure Container Apps, all observed by Application Insights." width="100%" />
 
 <h1>Agentic SDLC on Azure</h1>
 
@@ -42,20 +42,21 @@ A hosted **Azure AI Foundry** agent reasons through an **APIM-governed** model, 
 
 ## Demo
 
-> The live storefront being changed here is **`contoso-cart`** — a tiny shopping-cart app. Ask for a feature, watch it land.
+> The live storefront being changed here is **`contoso-cart`** — a tiny shopping-cart app. Ask for a feature, watch it land, and follow the whole thing in one Application Insights trace.
 
 <div align="center">
 
-<!-- Replace docs/assets/demo.gif with a ~20s screen recording of the
-     prompt -> issue -> PR -> deploy flow, then point this src at it. -->
-<img src="docs/assets/demo-placeholder.svg" alt="Demo of the prompt-to-deploy flow" width="80%" />
+<!-- Real Application Insights end-to-end transaction (sped up ~1.6x). Full video: docs/assets/demo.mp4 -->
+<img src="docs/assets/demo.gif" alt="Real Application Insights end-to-end trace of one delegated run" width="92%" />
+
+<em>One delegated run in Application Insights — APIM, the delivery API and the GitHub Copilot cloud-agent tree under a single <code>operation_Id</code>. ▶ <a href="docs/assets/demo.mp4">Watch the full video</a>.</em>
 
 </div>
 
 |  |  |
 |---|---|
-| <!-- Replace with docs/assets/screenshot-site.png --> <img src="docs/assets/screenshot-site-placeholder.svg" alt="Contoso Cart storefront" /> | <!-- Replace with docs/assets/screenshot-trace.png --> <img src="docs/assets/screenshot-trace-placeholder.svg" alt="End-to-end trace in Application Insights" /> |
-| The **contoso-cart** storefront that redeploys on every merge. | One **operation_Id** spanning APIM, the delivery API and the cloud agent. |
+| <img src="docs/assets/screenshot-site.png" alt="Contoso Cart storefront" /> | <img src="docs/assets/screenshot-trace.png" alt="End-to-end transaction in Application Insights" /> |
+| The **contoso-cart** storefront that redeploys on every merge. | The end-to-end transaction: one **operation_Id** across APIM, `/agent`, and the cloud-agent spans. |
 
 ---
 
