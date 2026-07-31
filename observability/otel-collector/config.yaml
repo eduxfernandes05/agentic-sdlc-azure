@@ -33,6 +33,12 @@ exporters:
   # Ponte para o Application Insights (<your-app-insights>) via connection string.
   azuremonitor:
     connection_string: "${env:APPLICATIONINSIGHTS_CONNECTION_STRING}"
+  # Elastic Cloud managed OTLP endpoint. Unifica todo o OTEL (app + cloud agent)
+  # no Elastic. Endpoint e API key injetados por env var (secret do Container App).
+  otlp/elastic:
+    endpoint: "${env:ELASTIC_OTLP_ENDPOINT}"
+    headers:
+      Authorization: "ApiKey ${env:ELASTIC_OTLP_API_KEY}"
   debug:
     verbosity: normal
 
@@ -42,12 +48,12 @@ service:
     traces:
       receivers: [otlp]
       processors: [transform/correlate, batch]
-      exporters: [azuremonitor, debug]
+      exporters: [azuremonitor, otlp/elastic, debug]
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [azuremonitor]
+      exporters: [azuremonitor, otlp/elastic]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [azuremonitor]
+      exporters: [azuremonitor, otlp/elastic]
